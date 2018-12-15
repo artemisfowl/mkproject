@@ -4,6 +4,8 @@
  * @brief project file holding all the atomic functions
  */
 
+#include <stdbool.h>
+
 /* macros */
 #ifndef MAX_ARGS
 #define MAX_ARGS 4
