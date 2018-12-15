@@ -12,7 +12,12 @@ int main(int argc, char *argv[])
 	if (argc < MIN_ARGS || argc > MAX_ARGS) {
 		printf("Error in number of arguments\n");
 		p_display_usage();
-		exit(0);
+		exit(EXIT_SUCCESS);
+	} else if ((argc == MIN_ARGS && strcmp(argv[MIN_ARGS - 1], "-t") == 0)
+			|| (argc == MIN_ARGS + 1)) {
+		printf("Expected project type and project name\n");
+		p_display_usage();
+		exit(EXIT_SUCCESS);
 	}
 
 	/* decrement the arg count so that we do not handle the name of the
@@ -26,6 +31,7 @@ int main(int argc, char *argv[])
 
 	/* count till argc drops */
 	while (argc--) {
+		/* put a check if -t is the last argument or not */
 		p_parse_flags(*argv, &p);
 		argv++;
 		if (p.rdp_t) {
