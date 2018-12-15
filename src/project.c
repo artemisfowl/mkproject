@@ -1,7 +1,7 @@
 /*
- * @file utility.c
+ * @file project.c
  * @author sb
- * @brief source file for utility header
+ * @brief source file for project header
  */
 
 

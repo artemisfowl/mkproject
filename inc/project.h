@@ -1,7 +1,7 @@
 /**
- * @file utility.h
+ * @file project.h
  * @author sb
- * @brief utility file holding all the atomic functions
+ * @brief project file holding all the atomic functions
  */
 
 /* macros */
