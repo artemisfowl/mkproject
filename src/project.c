@@ -6,7 +6,6 @@
 
 
 #include <stdio.h>
-#include <stdbool.h>
 #include "../inc/project.h"
 
 void p_display_usage(void)
