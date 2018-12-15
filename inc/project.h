@@ -27,7 +27,8 @@
 enum project_t {	/* this might be deprecated later */
 	C,
 	CPP,
-	nentries = 2
+	UNRECOGNIZED,
+	nentries = 3
 };
 
 /* structure */
@@ -75,5 +76,13 @@ void p_display_version(void);
  * @brief function to display the list of projects supported by the program
  */
 void p_list_ptypes(void);
+
+/*
+ * @function p_assign_ptype
+ * @brief function to parse and assign the project type
+ * @params [in] s pointer to the project type string
+ * @params [in] p is a pointer to a struct project instance
+ */
+void p_assign_ptype(const char * restrict s, struct project * restrict p);
 
 #endif

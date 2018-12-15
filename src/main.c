@@ -5,7 +5,6 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include "../inc/project.h"
 
 int main(int argc, char *argv[])
@@ -27,10 +26,10 @@ int main(int argc, char *argv[])
 
 	/* count till argc drops */
 	while (argc--) {
-		/* call the function to parse the flags now */
+		p_parse_flags(*argv, &p);
 		argv++;
 		if (p.rdp_t) {
-			/* call the function to assign the project type */
+			p_assign_ptype(*argv, &p);
 			p.rdp_t = false;
 
 			/* point to the project name and then exit the loop */

@@ -83,6 +83,23 @@ void p_list_ptypes(void)
 			case CPP:
 				printf("%d. CPP\n", i + 1);
 				break;
+			case UNRECOGNIZED:
+				printf("%d. UNRECOGNIZED\n", i + 1);
+				break;
 		}
 	}
+}
+
+void p_assign_ptype(const char * restrict s, struct project * restrict p)
+{
+	if (!s && !p) {
+		printf("Type of project or "
+				"project struct instance not provided\n");
+		return;
+	}
+
+	if (!strcmp(s, "c"))
+		p->ptype = C;
+	else if (!strcmp(s, "cpp"))
+		p->ptype = CPP;
 }
