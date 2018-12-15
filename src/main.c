@@ -22,16 +22,23 @@ int main(int argc, char *argv[])
 	argc--;
 	argv++;
 
-	/* create an object/instance of the structure */
 	struct project p;
-
-	/* initialize the program */
 	p_setup_struct(&p);
 
 	/* count till argc drops */
 	while (argc--) {
-		/* call the function to parse the flags */
+		/* call the function to parse the flags now */
+		argv++;
+		if (p.rdp_t) {
+			/* call the function to assign the project type */
+			p.rdp_t = false;
+
+			/* point to the project name and then exit the loop */
+			argv++;
+			break;
+		}
 	}
+	printf("Name of the project : %s\n", *argv);
 
 	return 0;
 }
