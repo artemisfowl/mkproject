@@ -4,7 +4,7 @@
  * @brief mkproject program main function
  */
 
-#include <stdio.h>
+#include "../inc/utility.h"
 
 int main(void)
 {
