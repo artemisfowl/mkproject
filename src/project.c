@@ -6,7 +6,6 @@
 
 
 #include <stdio.h>
-#include <string.h>
 #include "../inc/project.h"
 #include "../inc/version.h"
 
@@ -98,8 +97,12 @@ void p_assign_ptype(const char * restrict s, struct project * restrict p)
 		return;
 	}
 
-	if (!strcmp(s, "c"))
+	if (!strcmp(s, "c")) {
 		p->ptype = C;
-	else if (!strcmp(s, "cpp"))
+	} else if (!strcmp(s, "cpp")) {
 		p->ptype = CPP;
+	} else {
+		p->ptype = UNRECOGNIZED;
+		printf("Warning : Unrecognized project type provided\n");
+	}
 }
