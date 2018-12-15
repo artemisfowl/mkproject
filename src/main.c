@@ -23,8 +23,10 @@ int main(int argc, char *argv[])
 	argv++;
 
 	/* create an object/instance of the structure */
+	struct project p;
 
 	/* initialize the program */
+	p_setup_struct(&p);
 
 	/* count till argc drops */
 	while (argc--) {
