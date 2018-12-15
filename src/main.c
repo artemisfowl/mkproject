@@ -1,7 +1,7 @@
 /**
- * @file main.c
- * @author sb
- * @brief mkproject program main function
+ * @file 	main.c
+ * @author 	sb
+ * @brief 	mkproject program main function
  */
 
 #include <stdio.h>
