@@ -30,6 +30,7 @@ void p_setup_struct(struct project * restrict p)
 
 	p->ptype = C;
 	p->rdp_t = false;
+	p->pt = NULL;
 	p->cwd = NULL;
 	p->prwd = NULL;
 	p->src = NULL;
@@ -105,4 +106,18 @@ void p_assign_ptype(const char * restrict s, struct project * restrict p)
 		p->ptype = UNRECOGNIZED;
 		printf("Warning : Unrecognized project type provided\n");
 	}
+}
+
+void p_free_res(struct project * restrict p)
+{
+	if (!p) {
+		printf("Project struct instance not provided\n");
+		exit(EXIT_FAILURE);
+	}
+
+	free(p->cwd);
+	free(p->inc);
+	free(p->prwd);
+	free(p->pt);
+	free(p->src);
 }

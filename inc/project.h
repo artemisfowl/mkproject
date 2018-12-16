@@ -36,6 +36,7 @@ enum project_t {	/* this might be deprecated later */
 struct project {
 	enum project_t ptype;
 	int rdp_t;
+	char *pt;	/* project type name - dynamicity is the purpose */
 
 	/* directory holding fields */
 	char *cwd;
@@ -85,5 +86,11 @@ void p_list_ptypes(void);
  * @params [in] p is a pointer to a struct project instance
  */
 void p_assign_ptype(const char * restrict s, struct project * restrict p);
+
+/**
+ * @function p_free_resources
+ * @brief function to free the resources allocated
+ */
+void p_free_res(struct project * restrict p);
 
 #endif

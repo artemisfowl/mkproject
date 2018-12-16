@@ -29,6 +29,8 @@ int main(int argc, char *argv[])
 	struct project p;
 	p_setup_struct(&p);
 
+	/* read the configuration file */
+
 	/* count till argc drops */
 	while (argc--) {
 		/* put a check if -t is the last argument or not */
@@ -44,6 +46,9 @@ int main(int argc, char *argv[])
 		}
 	}
 	printf("Name of the project : %s\n", *argv);
+
+	/* free the resources before exiting */
+	p_free_res(&p);
 
 	return 0;
 }
