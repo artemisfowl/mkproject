@@ -144,7 +144,7 @@ void p_free_res(struct project * restrict p)
 	free(p->src);
 }
 
-int p_read_config(void)
+int p_check_config_dir(void)
 {
 	/* first read the home directory location */
 	char *h = getenv(USER_HOME);
@@ -161,6 +161,9 @@ int p_read_config(void)
 			r = 0;
 		}
 	} else {
+		/* put a default file - with a default address
+		 * decide on the address where the resource file will be
+		 * kept */
 		r = 1;
 	}
 

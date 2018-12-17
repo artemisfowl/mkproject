@@ -111,6 +111,6 @@ void p_free_res(struct project * restrict p);
  * @notes The configuration file will be present in the $HOME/.config/mkproject
  * location
  */
-int p_read_config(void);
+int p_check_config_dir(void);
 
 #endif
