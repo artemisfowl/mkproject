@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 #include "../inc/project.h"
 #include "../inc/version.h"
 
@@ -30,6 +31,16 @@ static bool p_dir_exists(const char *filepath)
 	return true;
 }
 
+static void p_write_file(const char * filepath, const char * d)
+{
+	FILE *f = fopen(filepath, "w");
+
+	if (!d)
+		fwrite(d, strlen(d), sizeof(char), f);
+
+	fclose(f);
+}
+
 /* header functions */
 void p_display_usage(void)
 {
@@ -43,13 +54,14 @@ void p_display_usage(void)
 			"mkproject -t c c_project_name\n");
 }
 
-void p_setup_struct(struct project * restrict p)
+void p_setup(struct project * restrict p)
 {
 	if (!p) {
 		printf("No structure provided\n");
 		return;
 	}
 
+	/* too many strings - will be reducing them one by one */
 	p->ptype = C;
 	p->rdp_t = false;
 	p->pt = NULL;
@@ -58,6 +70,40 @@ void p_setup_struct(struct project * restrict p)
 	p->src = NULL;
 	p->inc = NULL;
 	p->nfiles = 0;
+
+
+	/* create the path for the mkproject configuration directory */
+	char *h = getenv(USER_HOME);
+	char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
+	cl = strcat(cl, h);
+	cl = strcat(cl, CONFIG_LOC);
+
+
+	/* call the p_check_config_dir function here */
+	if (p_check_config_dir(cl) == 1) {
+		printf("Could not create the config directory\n");
+		printf("Config directory may already be present at "
+				"~/.config/mkproject\n");
+	}
+
+	/* reallocate memory to cl for adding the name of the configuration
+	 * file */
+	cl = realloc(cl, (strlen(h) + strlen(CONFIG_LOC)
+				+ strlen(CONFIG_FILE) + 1) * sizeof(char));
+	cl = strcat(cl, CONFIG_FILE);
+	printf("Config file final location : %s\n", cl);
+
+	/* check if the file exists - if it doesn't create it and let it be
+	 * empty - else read the contents of the file */
+	if (access(cl, F_OK) != -1) {
+		/* file exists - read the file */
+	} else {
+		/* create the file - add this code to a function */
+		p_write_file(cl, NULL);
+	}
+
+	/* free the resource */
+	free(cl);
 }
 
 void p_parse_flags(const char * restrict s, struct project * restrict p)
@@ -144,31 +190,20 @@ void p_free_res(struct project * restrict p)
 	free(p->src);
 }
 
-int p_check_config_dir(void)
+int p_check_config_dir(const char *cl)
 {
-	/* first read the home directory location */
-	char *h = getenv(USER_HOME);
-
 	/* return value */
 	int r = 0;
 
 	/* check if the mkproject directory exists or not */
-	char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
-	cl = strcat(cl, h);
-	cl = strcat(cl, CONFIG_LOC);
 	if (!p_dir_exists(cl)) {
 		if (mkdir(cl, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
 			r = 0;
 		}
 	} else {
-		/* put a default file - with a default address
-		 * decide on the address where the resource file will be
-		 * kept */
 		r = 1;
 	}
 
-	/* free the resource */
-	free(cl);
 	return r;
 }
 

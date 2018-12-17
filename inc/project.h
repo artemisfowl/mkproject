@@ -65,11 +65,11 @@ struct project {
 void p_display_usage(void);
 
 /**
- * @function p_setup_struct
+ * @function p_setup
  * @brief function to initialize the fields for the struct project
  * @params [in] p is a pointer to a struct project instance
  */
-void p_setup_struct(struct project * restrict p);
+void p_setup(struct project * restrict p);
 
 /**
  * @function p_parse_flags
@@ -111,6 +111,6 @@ void p_free_res(struct project * restrict p);
  * @notes The configuration file will be present in the $HOME/.config/mkproject
  * location
  */
-int p_check_config_dir(void);
+int p_check_config_dir(const char *cl);
 
 #endif

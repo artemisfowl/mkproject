@@ -27,18 +27,7 @@ int main(int argc, char *argv[])
 	argv++;
 
 	struct project p;
-	p_setup_struct(&p);
-
-	/* check if the config directory exists */
-	if (p_check_config_dir() == 1) {
-		printf("Could not create the config directory\n");
-		printf("Config directory is supposed to be created at "
-				"~/.config/mkproject\n");
-		p_free_res(&p);
-		exit(EXIT_FAILURE);
-	}
-
-	/* now read the configuration file */
+	p_setup(&p);
 
 	/* count till argc drops */
 	while (argc--) {
