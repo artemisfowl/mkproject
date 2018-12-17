@@ -6,9 +6,33 @@
 
 
 #include <stdio.h>
+#include <dirent.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "../inc/project.h"
 #include "../inc/version.h"
 
+/* static utility functions */
+static bool p_dir_exists(const char *filepath)
+{
+	/*
+	 * return true of the directory needs to be created
+	 * return false if the directory already exists
+	 */
+	if (!filepath) {
+		printf("Error, filepath has not been provided\n");
+		return false;
+	}
+
+	DIR *dir = opendir(filepath);
+	if (!dir && ENOENT == errno)
+		return true;
+
+	return false;
+}
+
+/* header functions */
 void p_display_usage(void)
 {
 	printf("Usage of the program:\n"
@@ -121,3 +145,26 @@ void p_free_res(struct project * restrict p)
 	free(p->pt);
 	free(p->src);
 }
+
+int p_read_config(void)
+{
+	/* first read the home directory location */
+	char *h = getenv(USER_HOME);
+
+	/* check if the mkproject directory exists or not */
+	char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
+	if (p_dir_exists(cl)) {
+		printf("Create the directory\n");
+		if (mkdir(cl, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+			printf("Directory could not be created\n"
+					"Please check path provided\n");
+			free(cl);
+			return 1;
+		}
+	}
+
+	/* free the resource */
+	free(cl);
+	return 0;
+}
+
