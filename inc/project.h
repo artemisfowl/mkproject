@@ -24,6 +24,18 @@
 #define FLAG_LEN 2
 #endif
 
+#ifndef USER_HOME
+#define USER_HOME "HOME"
+#endif
+
+#ifndef CONFIG_LOC
+#define CONFIG_LOC "/.config/mkproject/"
+#endif
+
+#ifndef CONFIG_FILE
+#define CONFIG_FILE "mkpconfig"
+#endif
+
 /* enum */
 enum project_t {	/* this might be deprecated later */
 	C,
@@ -92,5 +104,13 @@ void p_assign_ptype(const char * restrict s, struct project * restrict p);
  * @brief function to free the resources allocated
  */
 void p_free_res(struct project * restrict p);
+
+/**
+ * @function p_read_config
+ * @brief function to read the configuration file
+ * @notes The configuration file will be present in the $HOME/.config/mkproject
+ * location
+ */
+int p_read_config(void);
 
 #endif

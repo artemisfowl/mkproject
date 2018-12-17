@@ -154,10 +154,7 @@ int p_read_config(void)
 	/* check if the mkproject directory exists or not */
 	char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
 	if (p_dir_exists(cl)) {
-		printf("Create the directory\n");
 		if (mkdir(cl, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
-			printf("Directory could not be created\n"
-					"Please check path provided\n");
 			free(cl);
 			return 1;
 		}
