@@ -12,12 +12,12 @@ int main(int argc, char *argv[])
 	if (argc < MIN_ARGS || argc > MAX_ARGS) {
 		printf("Error in number of arguments\n");
 		p_display_usage();
-		exit(EXIT_SUCCESS);
+		exit(EXIT_FAILURE);
 	} else if ((argc == MIN_ARGS && strcmp(argv[MIN_ARGS - 1], "-t") == 0)
 			|| (argc == MIN_ARGS + 1)) {
 		printf("Expected project type and project name\n");
 		p_display_usage();
-		exit(EXIT_SUCCESS);
+		exit(EXIT_FAILURE);
 	}
 
 	/* decrement the arg count so that we do not handle the name of the
@@ -30,6 +30,13 @@ int main(int argc, char *argv[])
 	p_setup_struct(&p);
 
 	/* read the configuration file */
+	if (p_read_config() != 0) {
+		printf("Could not create the config directory\n");
+		printf("Config directory is supposed to be created at "
+				"~/.config/mkproject\n");
+		p_free_res(&p);
+		exit(EXIT_FAILURE);
+	}
 
 	/* count till argc drops */
 	while (argc--) {
