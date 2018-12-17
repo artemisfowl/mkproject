@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	p_setup_struct(&p);
 
 	/* read the configuration file */
-	if (p_read_config() != 0) {
+	if (p_read_config() == 1) {
 		printf("Could not create the config directory\n");
 		printf("Config directory is supposed to be created at "
 				"~/.config/mkproject\n");

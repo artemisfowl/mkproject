@@ -17,19 +17,17 @@
 static bool p_dir_exists(const char *filepath)
 {
 	/*
-	 * return true of the directory needs to be created
-	 * return false if the directory already exists
+	 * return false of the directory needs to be created
+	 * return true if the directory already exists
 	 */
-	if (!filepath) {
-		printf("Error, filepath has not been provided\n");
+	DIR *dir = opendir(filepath);
+	if (!dir && ENOENT == errno) {
+		closedir(dir);
 		return false;
 	}
 
-	DIR *dir = opendir(filepath);
-	if (!dir && ENOENT == errno)
-		return true;
-
-	return false;
+	closedir(dir);
+	return true;
 }
 
 /* header functions */
@@ -151,17 +149,23 @@ int p_read_config(void)
 	/* first read the home directory location */
 	char *h = getenv(USER_HOME);
 
+	/* return value */
+	int r = 0;
+
 	/* check if the mkproject directory exists or not */
 	char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
-	if (p_dir_exists(cl)) {
+	cl = strcat(cl, h);
+	cl = strcat(cl, CONFIG_LOC);
+	if (!p_dir_exists(cl)) {
 		if (mkdir(cl, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
-			free(cl);
-			return 1;
+			r = 0;
 		}
+	} else {
+		r = 1;
 	}
 
 	/* free the resource */
 	free(cl);
-	return 0;
+	return r;
 }
 
