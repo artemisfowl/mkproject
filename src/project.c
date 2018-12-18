@@ -35,10 +35,22 @@ static void p_write_file(const char * filepath, const char * d)
 {
 	FILE *f = fopen(filepath, "w");
 
-	if (!d)
+	if (d)
 		fwrite(d, strlen(d), sizeof(char), f);
 
 	fclose(f);
+}
+
+static off_t p_get_filesize(const char * restrict filepath)
+{
+	struct stat s;
+	int r = 0;
+	if ((r = stat(filepath, &s)) != 0) {
+		perror("Error with stat");
+		return r;
+	}
+
+	return s.st_size;
 }
 
 /* header functions */
@@ -96,9 +108,15 @@ void p_setup(struct project * restrict p)
 	/* check if the file exists - if it doesn't create it and let it be
 	 * empty - else read the contents of the file */
 	if (access(cl, F_OK) != -1) {
-		/* file exists - read the file */
+		/* file exists - read the file - check the size of the file -
+		 * if the file size is 0, do nothing and exit. If the file size
+		 * is not 0, read the contents and verify that the data present
+		 * is usable or not. If it is - go ahead and save the resource
+		 * dir location - else show error and exit */
+
+		/* create a function called p_get_filesize() */
+		printf("File size : %ld\n", p_get_filesize(cl));
 	} else {
-		/* create the file - add this code to a function */
 		p_write_file(cl, NULL);
 	}
 
