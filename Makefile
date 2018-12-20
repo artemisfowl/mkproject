@@ -3,7 +3,7 @@
 
 CFLAGS = -Wall -Wreturn-type -Werror -std=c11
 DBG_FLAGS := -g -g3 -O0 -DENABLE_DEBUG
-REL_FLAGS := -O2
+REL_FLAGS := -O3
 LDFLAGS :=
 
 EXEC := mkproject
