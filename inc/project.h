@@ -36,6 +36,14 @@
 #define CONFIG_FILE "mkpconfig"
 #endif
 
+#ifndef CONFIG_DELIM
+#define CONFIG_DELIM "="
+#endif
+
+#ifndef CONFIG_VAR
+#define CONFIG_VAR "res_dir_location"
+#endif
+
 /* enum */
 enum project_t {	/* this might be deprecated later */
 	C,
@@ -49,6 +57,7 @@ struct project {
 	enum project_t ptype;
 	int rdp_t;
 	char *pt;	/* project type name - dynamicity is the purpose */
+	char *resd;	/* resource directory location */
 
 	/* directory holding fields */
 	char *cwd;

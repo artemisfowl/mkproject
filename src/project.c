@@ -5,6 +5,10 @@
  */
 
 
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include <stdio.h>
 #include <dirent.h>
 #include <errno.h>
@@ -65,13 +69,36 @@ static char *p_read_config(const char * restrict fp)
 {
 	FILE *f = fopen(fp, "r");
 
-	/* checking the errno */
-	printf("%d\n", errno);
+	if (!f) {
+		perror("fopen : couldn't open file - check filepath");
+		return NULL;
+	}
 
+	char *c = NULL;
+	char *ret = NULL;
+	char *tok = NULL;
+	size_t n = 0;
+	while(getline(&c, &n, f) != -1) {
+		if (*c != '#') {
+			tok = strtok(c, CONFIG_DELIM);
+			/* after reaching the first proper line - break out */
+			break;
+		}
+	}
+
+	for (int f = 0; tok; tok = strtok(NULL, CONFIG_DELIM)) {
+		if (strcmp(tok, CONFIG_VAR) == 0) {
+			f = 1;
+		} else if (f) {
+			ret = strndup(tok, strcspn(tok, "\n"));
+			f = 0;
+		}
+	}
+
+	free(c);
 	fclose(f);
 
-	/* returning NULL for now */
-	return NULL;
+	return ret;
 }
 
 /* header functions */
@@ -82,6 +109,7 @@ void p_display_usage(void)
 			"-t		type of the project\n"
 			"-v		display version information\n"
 			"-h		display help information\n"
+			"-c		display config file help information\n"
 			"-l		display the list of project types\n"
 			"For example, in order to create a C project\n"
 			"mkproject -t c c_project_name\n");
@@ -104,6 +132,9 @@ void p_setup(struct project * restrict p)
 	p->inc = NULL;
 	p->nfiles = 0;
 
+	/* new fields */
+	p->resd = NULL;
+
 
 	char *h = getenv(USER_HOME);
 	char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
@@ -122,7 +153,8 @@ void p_setup(struct project * restrict p)
 	printf("Config file final location : %s\n", cl);
 
 	if (access(cl, F_OK) != -1) {
-		if (p_get_filesize(cl) == 0) {
+		if ((p_get_filesize(cl) == 0) ||
+				!(p->resd = p_read_config(cl))) {
 			printf("No configuration present in the file\n"
 					"Nothing to create/copy\n");
 
@@ -137,17 +169,8 @@ void p_setup(struct project * restrict p)
 		 * of the file
 		 * For now add the location of the resource directory
 		 * process/parse the configuration location */
-		char *r = p_read_config(cl);
-		if (!r) {
-			/* resource file path not specified - hence show error
-			 * and exit */
-			printf("Resource filepath has not been set up\n"
-					"Please check the format with -c"
-					"flag\n");
-			free(cl);
-			p_free_res(p);
-			exit(EXIT_SUCCESS);
-		}
+
+		printf("Resource location : %s\n", p->resd);
 	} else {
 		p_write_file(cl, NULL);
 	}
@@ -175,6 +198,9 @@ void p_parse_flags(const char * restrict s, struct project * restrict p)
 			exit(EXIT_SUCCESS);
 		case 'l':
 			p_list_ptypes();
+			exit(EXIT_SUCCESS);
+		case 'c':
+			p_display_config_help();
 			exit(EXIT_SUCCESS);
 		case 't':
 			p->rdp_t = true;
@@ -232,6 +258,9 @@ void p_free_res(struct project * restrict p)
 		printf("Project struct instance not provided\n");
 		exit(EXIT_FAILURE);
 	}
+
+	/* new fields */
+	free(p->resd);
 
 	free(p->cwd);
 	free(p->inc);
