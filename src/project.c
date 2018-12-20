@@ -164,12 +164,8 @@ void p_setup(struct project * restrict p)
 			p_free_res(p);
 			exit(EXIT_SUCCESS);
 		}
-		/* else read the file and get the resource directory details
-		 * need to write a function for reading and getting the details
-		 * of the file
-		 * For now add the location of the resource directory
-		 * process/parse the configuration location */
 
+		/* resource directory found */
 		printf("Resource location : %s\n", p->resd);
 	} else {
 		p_write_file(cl, NULL);
