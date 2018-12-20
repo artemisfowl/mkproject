@@ -62,7 +62,7 @@ static void p_display_config_help(void)
 	printf("\nConfiguration can be added in the following way : \n");
 	printf("# Resource directory configuration - all lines with # "
 			"are comments\n"
-			"res_dir_location=<absolute_path>/res/\n");
+			"res_dir_location=<absolute_path>/res/\n\n");
 }
 
 static char *p_read_config(const char * restrict fp)
@@ -136,6 +136,7 @@ void p_setup(struct project * restrict p)
 	p->resd = NULL;
 
 
+#if 0
 	char *h = getenv(USER_HOME);
 	char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
 	cl = strcat(cl, h);
@@ -170,6 +171,7 @@ void p_setup(struct project * restrict p)
 
 	/* free the resource */
 	free(cl);
+#endif
 }
 
 void p_parse_flags(const char * restrict s, struct project * restrict p)
@@ -277,5 +279,43 @@ int p_check_config_dir(const char *cl)
 	}
 
 	return r;
+}
+
+void p_get_resd_loc(struct project * restrict p)
+{
+	char *h = getenv(USER_HOME);
+	char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
+	cl = strcat(cl, h);
+	cl = strcat(cl, CONFIG_LOC);
+
+	if (p_check_config_dir(cl) == 1) {
+		printf("Could not create the config directory\n");
+		printf("Config directory may already be present at "
+				"~/.config/mkproject\n");
+	}
+
+	cl = realloc(cl, (strlen(h) + strlen(CONFIG_LOC)
+				+ strlen(CONFIG_FILE) + 1) * sizeof(char));
+	cl = strcat(cl, CONFIG_FILE);
+	printf("Config file final location : %s\n", cl);
+
+	if (access(cl, F_OK) != -1) {
+		if ((p_get_filesize(cl) == 0) ||
+				!(p->resd = p_read_config(cl))) {
+			printf("No configuration present in the file\n"
+					"Nothing to create/copy\n");
+
+			p_display_config_help();
+			printf("\nProgram will now quit\n");
+			free(cl);
+			p_free_res(p);
+			exit(EXIT_SUCCESS);
+		}
+	} else {
+		p_write_file(cl, NULL);
+	}
+
+	/* free the resource */
+	free(cl);
 }
 
