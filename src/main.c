@@ -29,6 +29,9 @@ int main(int argc, char *argv[])
 	struct project p;
 	p_setup(&p);
 
+	/* check the resource directory location is stored or not */
+	printf("Resource directory locatioin from main func : %s\n", p.resd);
+
 	/* count till argc drops */
 	while (argc--) {
 		/* put a check if -t is the last argument or not */

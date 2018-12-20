@@ -164,9 +164,6 @@ void p_setup(struct project * restrict p)
 			p_free_res(p);
 			exit(EXIT_SUCCESS);
 		}
-
-		/* resource directory found */
-		printf("Resource location : %s\n", p->resd);
 	} else {
 		p_write_file(cl, NULL);
 	}
