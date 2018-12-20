@@ -53,6 +53,27 @@ static off_t p_get_filesize(const char * restrict filepath)
 	return s.st_size;
 }
 
+static void p_display_config_help(void)
+{
+	printf("\nConfiguration can be added in the following way : \n");
+	printf("# Resource directory configuration - all lines with # "
+			"are comments\n"
+			"res_dir_location=<absolute_path>/res/\n");
+}
+
+static char *p_read_config(const char * restrict fp)
+{
+	FILE *f = fopen(fp, "r");
+
+	/* checking the errno */
+	printf("%d\n", errno);
+
+	fclose(f);
+
+	/* returning NULL for now */
+	return NULL;
+}
+
 /* header functions */
 void p_display_usage(void)
 {
@@ -84,38 +105,49 @@ void p_setup(struct project * restrict p)
 	p->nfiles = 0;
 
 
-	/* create the path for the mkproject configuration directory */
 	char *h = getenv(USER_HOME);
 	char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
 	cl = strcat(cl, h);
 	cl = strcat(cl, CONFIG_LOC);
 
-
-	/* call the p_check_config_dir function here */
 	if (p_check_config_dir(cl) == 1) {
 		printf("Could not create the config directory\n");
 		printf("Config directory may already be present at "
 				"~/.config/mkproject\n");
 	}
 
-	/* reallocate memory to cl for adding the name of the configuration
-	 * file */
 	cl = realloc(cl, (strlen(h) + strlen(CONFIG_LOC)
 				+ strlen(CONFIG_FILE) + 1) * sizeof(char));
 	cl = strcat(cl, CONFIG_FILE);
 	printf("Config file final location : %s\n", cl);
 
-	/* check if the file exists - if it doesn't create it and let it be
-	 * empty - else read the contents of the file */
 	if (access(cl, F_OK) != -1) {
-		/* file exists - read the file - check the size of the file -
-		 * if the file size is 0, do nothing and exit. If the file size
-		 * is not 0, read the contents and verify that the data present
-		 * is usable or not. If it is - go ahead and save the resource
-		 * dir location - else show error and exit */
+		if (p_get_filesize(cl) == 0) {
+			printf("No configuration present in the file\n"
+					"Nothing to create/copy\n");
 
-		/* create a function called p_get_filesize() */
-		printf("File size : %ld\n", p_get_filesize(cl));
+			p_display_config_help();
+			printf("\nProgram will now quit\n");
+			free(cl);
+			p_free_res(p);
+			exit(EXIT_SUCCESS);
+		}
+		/* else read the file and get the resource directory details
+		 * need to write a function for reading and getting the details
+		 * of the file
+		 * For now add the location of the resource directory
+		 * process/parse the configuration location */
+		char *r = p_read_config(cl);
+		if (!r) {
+			/* resource file path not specified - hence show error
+			 * and exit */
+			printf("Resource filepath has not been set up\n"
+					"Please check the format with -c"
+					"flag\n");
+			free(cl);
+			p_free_res(p);
+			exit(EXIT_SUCCESS);
+		}
 	} else {
 		p_write_file(cl, NULL);
 	}
