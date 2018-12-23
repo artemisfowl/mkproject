@@ -110,7 +110,6 @@ void p_display_usage(void)
 			"-v		display version information\n"
 			"-h		display help information\n"
 			"-c		display config file help information\n"
-			"-l		display the list of project types\n"
 			"For example, in order to create a C project\n"
 			"mkproject -t c c_project_name\n");
 }
@@ -134,44 +133,6 @@ void p_setup(struct project * restrict p)
 
 	/* new fields */
 	p->resd = NULL;
-
-
-#if 0
-	char *h = getenv(USER_HOME);
-	char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
-	cl = strcat(cl, h);
-	cl = strcat(cl, CONFIG_LOC);
-
-	if (p_check_config_dir(cl) == 1) {
-		printf("Could not create the config directory\n");
-		printf("Config directory may already be present at "
-				"~/.config/mkproject\n");
-	}
-
-	cl = realloc(cl, (strlen(h) + strlen(CONFIG_LOC)
-				+ strlen(CONFIG_FILE) + 1) * sizeof(char));
-	cl = strcat(cl, CONFIG_FILE);
-	printf("Config file final location : %s\n", cl);
-
-	if (access(cl, F_OK) != -1) {
-		if ((p_get_filesize(cl) == 0) ||
-				!(p->resd = p_read_config(cl))) {
-			printf("No configuration present in the file\n"
-					"Nothing to create/copy\n");
-
-			p_display_config_help();
-			printf("\nProgram will now quit\n");
-			free(cl);
-			p_free_res(p);
-			exit(EXIT_SUCCESS);
-		}
-	} else {
-		p_write_file(cl, NULL);
-	}
-
-	/* free the resource */
-	free(cl);
-#endif
 }
 
 void p_parse_flags(const char * restrict s, struct project * restrict p)
@@ -191,9 +152,6 @@ void p_parse_flags(const char * restrict s, struct project * restrict p)
 		case 'v':
 			p_display_version();
 			exit(EXIT_SUCCESS);
-		case 'l':
-			p_list_ptypes();
-			exit(EXIT_SUCCESS);
 		case 'c':
 			p_display_config_help();
 			exit(EXIT_SUCCESS);
@@ -210,23 +168,6 @@ void p_parse_flags(const char * restrict s, struct project * restrict p)
 void p_display_version(void)
 {
 	printf("mkproject version : %d.%d\n", VER_MAJ_NUM, VER_MIN_NUM);
-}
-
-void p_list_ptypes(void)
-{
-	for (int i = 0; i < nentries; i++) {
-		switch (i) {
-			case C:
-				printf("%d. C\n", i + 1);
-				break;
-			case CPP:
-				printf("%d. CPP\n", i + 1);
-				break;
-			case UNRECOGNIZED:
-				printf("%d. UNRECOGNIZED\n", i + 1);
-				break;
-		}
-	}
 }
 
 void p_assign_ptype(const char * restrict s, struct project * restrict p)

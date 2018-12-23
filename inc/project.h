@@ -94,12 +94,6 @@ void p_parse_flags(const char * restrict s, struct project * restrict p);
  */
 void p_display_version(void);
 
-/**
- * @function p_list_ptypes
- * @brief function to display the list of projects supported by the program
- */
-void p_list_ptypes(void);
-
 /*
  * @function p_assign_ptype
  * @brief function to parse and assign the project type
