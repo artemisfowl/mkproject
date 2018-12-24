@@ -45,6 +45,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	/* project type information */
+	printf("Project type : %s\n", p.pt);
+
 	/* read the configuration file and store the resource directory
 	 * location */
 	p_get_resd_loc(&p);

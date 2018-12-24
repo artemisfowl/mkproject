@@ -178,14 +178,8 @@ void p_assign_ptype(const char * restrict s, struct project * restrict p)
 		return;
 	}
 
-	if (!strcmp(s, "c")) {
-		p->ptype = C;
-	} else if (!strcmp(s, "cpp")) {
-		p->ptype = CPP;
-	} else {
-		p->ptype = UNRECOGNIZED;
-		printf("Warning : Unrecognized project type provided\n");
-	}
+	/* just save the project type for later use */
+	p->pt = strdup(s);
 }
 
 void p_free_res(struct project * restrict p)
@@ -197,11 +191,11 @@ void p_free_res(struct project * restrict p)
 
 	/* new fields */
 	free(p->resd);
+	free(p->pt);
 
 	free(p->cwd);
 	free(p->inc);
 	free(p->prwd);
-	free(p->pt);
 	free(p->src);
 }
 
