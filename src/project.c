@@ -254,3 +254,22 @@ void p_get_resd_loc(struct project * restrict p)
 	free(cl);
 }
 
+
+void p_read_template(struct project * restrict p)
+{
+	/* code will be added shortly */
+	printf("Resource directory location from main func : %s\n", p->resd);
+
+	/* project type has been saved already */
+	printf("\nProject type as specified : %s\n", p->pt);
+}
+
+void mkproject(struct project * restrict p)
+{
+	/*
+	 * first create the project directory - if the directory already
+	 * exists, do not create it, copy the necessary files else create it
+	 */
+	p_read_template(p);
+}
+

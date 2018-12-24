@@ -45,18 +45,17 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* project type information */
-	printf("Project type : %s\n", p.pt);
-
 	/* read the configuration file and store the resource directory
 	 * location */
 	p_get_resd_loc(&p);
-	printf("Resource directory location from main func : %s\n", p.resd);
 
 	/* now based on the project type, read the specific json file and then
 	 * copy the necessary files - this is where the code for parsing the
 	 * JSON files need to be polished more - working on this today */
 
+
+	/* name of the project specified - later on need to add support for
+	 * creating the project ath egiven path */
 	printf("Name of the project : %s\n", *argv);
 
 	/* free the resources before exiting */
