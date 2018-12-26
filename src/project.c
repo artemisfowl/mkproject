@@ -101,7 +101,7 @@ static char *p_read_config(const char * restrict fp)
 	return ret;
 }
 
-static int create_dir(const char *dp)
+static int p_create_dir(const char *dp)
 {
 	if (!dp) {
 		printf("Dir path has not been provided\n");
@@ -217,7 +217,7 @@ int p_check_config_dir(const char *cl)
 
 	/* check if the mkproject directory exists or not */
 	if (!p_dir_exists(cl)) {
-		if (create_dir(cl) != 0) {
+		if (p_create_dir(cl) != 0) {
 			r = 0;
 		}
 	} else {
@@ -227,6 +227,8 @@ int p_check_config_dir(const char *cl)
 	return r;
 }
 
+/* the reading of this function has to be seen - there is a small bug that I
+ * have figured out */
 void p_get_resd_loc(struct project * restrict p)
 {
 	char *h = getenv(USER_HOME);
