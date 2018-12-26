@@ -58,6 +58,7 @@ struct project {
 	int rdp_t;
 	char *pt;	/* project type name - dynamicity is the purpose */
 	char *resd;	/* resource directory location */
+	char *pdn;	/* project directory name or the project name */
 
 	/* directory holding fields */
 	char *cwd;
