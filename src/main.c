@@ -4,6 +4,10 @@
  * @brief 	mkproject program main function
  */
 
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include <stdio.h>
 #include "../inc/project.h"
 
@@ -53,10 +57,12 @@ int main(int argc, char *argv[])
 	 * copy the necessary files - this is where the code for parsing the
 	 * JSON files need to be polished more - working on this today */
 
+	/* save the name of the project in the project structure */
+	p.pdn = strdup(*argv);
+	printf("Name of the project : %s\n", p.pdn);
 
-	/* name of the project specified - later on need to add support for
-	 * creating the project ath egiven path */
-	printf("Name of the project : %s\n", *argv);
+	/* making the call to the final function */
+	mkproject(&p);
 
 	/* free the resources before exiting */
 	p_free_res(&p);
