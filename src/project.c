@@ -101,6 +101,15 @@ static char *p_read_config(const char * restrict fp)
 	return ret;
 }
 
+static int create_dir(const char *dp)
+{
+	if (!dp) {
+		printf("Dir path has not been provided\n");
+		return -1;
+	}
+	return mkdir(dp, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+}
+
 /* header functions */
 void p_display_usage(void)
 {
@@ -133,6 +142,7 @@ void p_setup(struct project * restrict p)
 
 	/* new fields */
 	p->resd = NULL;
+	p->pdn = NULL;
 }
 
 void p_parse_flags(const char * restrict s, struct project * restrict p)
@@ -192,6 +202,7 @@ void p_free_res(struct project * restrict p)
 	/* new fields */
 	free(p->resd);
 	free(p->pt);
+	free(p->pdn);
 
 	free(p->cwd);
 	free(p->inc);
@@ -206,7 +217,7 @@ int p_check_config_dir(const char *cl)
 
 	/* check if the mkproject directory exists or not */
 	if (!p_dir_exists(cl)) {
-		if (mkdir(cl, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+		if (create_dir(cl) != 0) {
 			r = 0;
 		}
 	} else {
@@ -270,6 +281,10 @@ void mkproject(struct project * restrict p)
 	 * first create the project directory - if the directory already
 	 * exists, do not create it, copy the necessary files else create it
 	 */
-	p_read_template(p);
+	if (p_dir_exists(p->pdn))
+		printf("Dir exists\n");
+	else
+		printf("Creating the directory\n");
+	p_read_template(p);	/* read template later */
 }
 
