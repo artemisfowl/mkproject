@@ -44,6 +44,10 @@
 #define CONFIG_VAR "res_dir_location"
 #endif
 
+#ifndef RES_EXTENSION
+#define RES_EXTENSION ".json"
+#endif
+
 /* enum */
 enum project_t {	/* this might be deprecated later */
 	C,

@@ -110,6 +110,23 @@ static int p_create_dir(const char *dp)
 	return mkdir(dp, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 }
 
+static char *p_read_file(const char * restrict fp, char *buf)
+{
+	buf = calloc(p_get_filesize(fp) + 1, sizeof(char));
+
+	FILE *f = fopen(fp, "r");
+	char *t = NULL;
+	ssize_t nread = 0;
+	size_t n = 0;
+
+	while ((nread = getline(&t, &n, f)) != -1)
+		buf = strcat(buf, t);
+
+	free(t);
+	fclose(f);
+	return buf;
+}
+
 /* header functions */
 void p_display_usage(void)
 {
@@ -227,8 +244,6 @@ int p_check_config_dir(const char *cl)
 	return r;
 }
 
-/* the reading of this function has to be seen - there is a small bug that I
- * have figured out */
 void p_get_resd_loc(struct project * restrict p)
 {
 	char *h = getenv(USER_HOME);
@@ -275,18 +290,45 @@ void p_read_template(struct project * restrict p)
 
 	/* project type has been saved already */
 	printf("\nProject type as specified : %s\n", p->pt);
+
+	/* read the specific template file - so if cpp is the type of
+	 * project(pt field of the struct), read cpp.json file
+	 * The JSON file should contain the complete path to the build files to
+	 * be copied */
+
+	char fp[strlen(p->resd) + strlen(p->pt) + strlen(RES_EXTENSION) + 1];
+	memset(fp, 0, strlen(p->resd) + strlen(p->pt) +
+			strlen(RES_EXTENSION) + 1);
+
+	/* concatenate the values */
+	strcat(fp, p->resd);
+	strcat(fp, p->pt);
+	strcat(fp, RES_EXTENSION);
+
+	/* read the file and parse the json */
+	char *jsnd = NULL;
+	jsnd = p_read_file(fp, jsnd);
+
+	/* print the data received */
+	printf("JSON data : %s\n", jsnd);
+
+	/* start by parsing the json file now and creating the directories as
+	 * well as copying the necessary files - start from here */
+
+	/* free this resource once this function is getting its call stack
+	 * cleaned */
+	free(jsnd);
 }
 
 void mkproject(struct project * restrict p)
 {
-	/*
-	 * first create the project directory - if the directory already
-	 * exists, do not create it, copy the necessary files else create it
-	 */
-	if (p_dir_exists(p->pdn))
+	if (p_dir_exists(p->pdn)) {
 		printf("Dir exists\n");
-	else
+	} else {
 		printf("Creating the directory\n");
+		/* create the directory in the current working directory */
+		p_create_dir(p->pdn);
+	}
 	p_read_template(p);	/* read template later */
 }
 
