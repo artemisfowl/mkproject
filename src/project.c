@@ -127,6 +127,65 @@ static char *p_read_file(const char * restrict fp, char *buf)
 	return buf;
 }
 
+#if 0
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s)
+{
+	if (tok->type == JSMN_STRING &&
+				(int)strlen(s) == tok->end - tok->start &&
+				strncmp(json + tok->start, s,
+					tok->end - tok->start) == 0)
+			return 0;
+	return -1;
+}
+#endif
+
+static void p_parse_json(const char * restrict jsd)
+{
+	if (!jsd) {
+		printf("JSON data has nopt been provided");
+		return;
+	}
+
+	/* process the JSON data - start working from here */
+	int num_tok = 0;	/* number of tokens */
+	jsmn_parser jp;
+
+	/* initialize the parser */
+	jsmn_init(&jp);
+
+	/* get the number of the tokens */
+	num_tok = jsmn_parse(&jp, jsd, strlen(jsd), NULL, 0);
+	printf("Number of tokens found : %d\n", num_tok);
+
+	/* re-init the parser - also write the json_eq function
+	 * There seems to be a way to see if there are child nodes or not */
+	jsmntok_t t[num_tok];
+	jsmn_init(&jp);
+
+	num_tok = jsmn_parse(&jp, jsd, strlen(jsd), t, num_tok);
+
+	/* check if the first token type is of OBJECT or not */
+	if (num_tok < 1 || t[0].type != JSMN_OBJECT) {
+		printf("Object expected\n");
+		return;
+	}
+
+	/* check the number of child elements that exist for the token type */
+	for (int i = 1; i < num_tok; i++) {
+		/* get the length of the buffer */
+		int len = t[i].end - t[i].start;
+
+		/* splice the string here */
+		char spliced[len];	/* reducing the dyn-mem-allocs */
+		for (int m = t[i].start, l = 0; m <= t[i].end; m++, l++)
+			spliced[l] = jsd[m];
+		spliced[len] = '\0';
+
+		printf("For string : %s --> Number of children : %d\n",
+				spliced, t[i].size);
+	}
+}
+
 /* header functions */
 void p_display_usage(void)
 {
@@ -314,6 +373,7 @@ void p_read_template(struct project * restrict p)
 
 	/* start by parsing the json file now and creating the directories as
 	 * well as copying the necessary files - start from here */
+	p_parse_json(jsnd);
 
 	/* free this resource once this function is getting its call stack
 	 * cleaned */
