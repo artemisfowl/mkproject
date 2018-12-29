@@ -127,7 +127,6 @@ static char *p_read_file(const char * restrict fp, char *buf)
 	return buf;
 }
 
-#if 0
 static int jsoneq(const char *json, jsmntok_t *tok, const char *s)
 {
 	if (tok->type == JSMN_STRING &&
@@ -137,7 +136,6 @@ static int jsoneq(const char *json, jsmntok_t *tok, const char *s)
 			return 0;
 	return -1;
 }
-#endif
 
 static void p_parse_json(const char * restrict jsd)
 {
@@ -145,6 +143,11 @@ static void p_parse_json(const char * restrict jsd)
 		printf("JSON data has nopt been provided");
 		return;
 	}
+
+	/*
+	 * As of now - not implementing complicated JSON handling - basic
+	 * specific structure of JSON to be handled as of now
+	 */
 
 	/* process the JSON data - start working from here */
 	int num_tok = 0;	/* number of tokens */
@@ -172,6 +175,14 @@ static void p_parse_json(const char * restrict jsd)
 
 	/* check the number of child elements that exist for the token type */
 	for (int i = 1; i < num_tok; i++) {
+		/*
+		 * This is what needs to be followed:
+		 * First check if the token matches with the string provided,
+		 * if it matches, get the number of children. Now loop with
+		 * this num_child and get the values out - finally process them
+		 * in the same loop
+		 */
+#if 0
 		/* get the length of the buffer */
 		int len = t[i].end - t[i].start;
 
@@ -181,8 +192,53 @@ static void p_parse_json(const char * restrict jsd)
 			spliced[l] = jsd[m];
 		spliced[len] = '\0';
 
-		printf("For string : %s --> Number of children : %d\n",
-				spliced, t[i].size);
+		printf("For string : %s --> Number of children : %d and"
+				" index(i) value: %d\n",
+				spliced, t[i].size, i);
+#endif
+
+		bool f_dir_id = false;
+		bool f_bfiles_id = false;
+
+		if (jsoneq(jsd, &t[i], TEMPL_DIR_ID) == 0) {
+			printf("Found the %s node\n", TEMPL_DIR_ID);
+			i++;
+			f_dir_id = true;
+		} else if (jsoneq(jsd, &t[i], TEMPL_BUILD_ID) == 0) {
+			printf("Found the %s node\n", TEMPL_BUILD_ID);
+			i++;
+			f_bfiles_id = true;
+		}
+
+		/* based on the bool value check for the next values */
+		if (f_dir_id) {
+			/* call a function for splicing the string and then
+			 * create the directories inside the project directory
+			 * */
+			printf("Inside check for dir_id\n");
+
+			int pos = i + 1;
+			for (int cn = 0; cn < t[i].size; cn++, pos++) {
+				printf("%.*s\n", t[pos].end - t[pos].start,
+						jsd + t[pos].start);
+			}
+			f_dir_id = false;
+		} else if (f_bfiles_id) {
+			/*
+			 * call a function for splicing the string and then
+			 * copy the respective files from the location
+			 * mentioned to the project directory
+			 */
+			printf("Inside check for bfiles_id\n");
+
+			int pos = i + 1;
+			for (int cn = 0; cn < t[i].size; cn++, pos++) {
+				printf("%.*s\n", t[pos].end - t[pos].start,
+						jsd + t[pos].start);
+			}
+			f_dir_id = false;
+		}
+
 	}
 }
 

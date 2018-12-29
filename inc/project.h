@@ -49,6 +49,14 @@
 #define RES_EXTENSION ".json"
 #endif
 
+#ifndef TEMPL_DIR_ID
+#define TEMPL_DIR_ID "dirs"
+#endif
+
+#ifndef TEMPL_BUILD_ID
+#define TEMPL_BUILD_ID "build_files"
+#endif
+
 /* enum */
 enum project_t {	/* this might be deprecated later */
 	C,
