@@ -137,6 +137,15 @@ static int jsoneq(const char *json, jsmntok_t *tok, const char *s)
 	return -1;
 }
 
+static char *strsplice(const char *s, int start, int end)
+{
+	char *spliced = calloc(end - start + 1, sizeof(char));
+	for (int m = start, l = 0; m < end; m++, l++)
+		spliced[l] = s[m];
+	spliced[end - start] = '\0';
+	return spliced;
+}
+
 static void p_parse_json(const char * restrict jsd)
 {
 	if (!jsd) {
@@ -144,59 +153,25 @@ static void p_parse_json(const char * restrict jsd)
 		return;
 	}
 
-	/*
-	 * As of now - not implementing complicated JSON handling - basic
-	 * specific structure of JSON to be handled as of now
-	 */
-
-	/* process the JSON data - start working from here */
-	int num_tok = 0;	/* number of tokens */
+	int num_tok = 0;
 	jsmn_parser jp;
 
-	/* initialize the parser */
 	jsmn_init(&jp);
 
-	/* get the number of the tokens */
 	num_tok = jsmn_parse(&jp, jsd, strlen(jsd), NULL, 0);
 	printf("Number of tokens found : %d\n", num_tok);
 
-	/* re-init the parser - also write the json_eq function
-	 * There seems to be a way to see if there are child nodes or not */
 	jsmntok_t t[num_tok];
 	jsmn_init(&jp);
 
 	num_tok = jsmn_parse(&jp, jsd, strlen(jsd), t, num_tok);
 
-	/* check if the first token type is of OBJECT or not */
 	if (num_tok < 1 || t[0].type != JSMN_OBJECT) {
 		printf("Object expected\n");
 		return;
 	}
 
-	/* check the number of child elements that exist for the token type */
 	for (int i = 1; i < num_tok; i++) {
-		/*
-		 * This is what needs to be followed:
-		 * First check if the token matches with the string provided,
-		 * if it matches, get the number of children. Now loop with
-		 * this num_child and get the values out - finally process them
-		 * in the same loop
-		 */
-#if 0
-		/* get the length of the buffer */
-		int len = t[i].end - t[i].start;
-
-		/* splice the string here */
-		char spliced[len];	/* reducing the dyn-mem-allocs */
-		for (int m = t[i].start, l = 0; m <= t[i].end; m++, l++)
-			spliced[l] = jsd[m];
-		spliced[len] = '\0';
-
-		printf("For string : %s --> Number of children : %d and"
-				" index(i) value: %d\n",
-				spliced, t[i].size, i);
-#endif
-
 		bool f_dir_id = false;
 		bool f_bfiles_id = false;
 
@@ -210,31 +185,30 @@ static void p_parse_json(const char * restrict jsd)
 			f_bfiles_id = true;
 		}
 
-		/* based on the bool value check for the next values */
 		if (f_dir_id) {
-			/* call a function for splicing the string and then
-			 * create the directories inside the project directory
-			 * */
 			printf("Inside check for dir_id\n");
 
 			int pos = i + 1;
 			for (int cn = 0; cn < t[i].size; cn++, pos++) {
-				printf("%.*s\n", t[pos].end - t[pos].start,
-						jsd + t[pos].start);
+				char *splstr = strsplice(jsd,
+						t[pos].start, t[pos].end);
+				printf("After splicing of dirs : %s\n",
+						splstr);
+				/* create the directories now */
+				free(splstr);
 			}
 			f_dir_id = false;
 		} else if (f_bfiles_id) {
-			/*
-			 * call a function for splicing the string and then
-			 * copy the respective files from the location
-			 * mentioned to the project directory
-			 */
 			printf("Inside check for bfiles_id\n");
 
 			int pos = i + 1;
 			for (int cn = 0; cn < t[i].size; cn++, pos++) {
-				printf("%.*s\n", t[pos].end - t[pos].start,
-						jsd + t[pos].start);
+				char *splstr = strsplice(jsd,
+						t[pos].start, t[pos].end);
+				printf("After splicing of build files : %s\n",
+						splstr);
+				/* copy the respective files now */
+				free(splstr);
 			}
 			f_dir_id = false;
 		}
@@ -320,7 +294,6 @@ void p_assign_ptype(const char * restrict s, struct project * restrict p)
 		return;
 	}
 
-	/* just save the project type for later use */
 	p->pt = strdup(s);
 }
 
@@ -393,46 +366,31 @@ void p_get_resd_loc(struct project * restrict p)
 		p_write_file(cl, NULL);
 	}
 
-	/* free the resource */
 	free(cl);
 }
 
 
 void p_read_template(struct project * restrict p)
 {
-	/* code will be added shortly */
 	printf("Resource directory location from main func : %s\n", p->resd);
 
-	/* project type has been saved already */
 	printf("\nProject type as specified : %s\n", p->pt);
-
-	/* read the specific template file - so if cpp is the type of
-	 * project(pt field of the struct), read cpp.json file
-	 * The JSON file should contain the complete path to the build files to
-	 * be copied */
 
 	char fp[strlen(p->resd) + strlen(p->pt) + strlen(RES_EXTENSION) + 1];
 	memset(fp, 0, strlen(p->resd) + strlen(p->pt) +
 			strlen(RES_EXTENSION) + 1);
 
-	/* concatenate the values */
 	strcat(fp, p->resd);
 	strcat(fp, p->pt);
 	strcat(fp, RES_EXTENSION);
 
-	/* read the file and parse the json */
 	char *jsnd = NULL;
 	jsnd = p_read_file(fp, jsnd);
 
-	/* print the data received */
 	printf("JSON data : %s\n", jsnd);
 
-	/* start by parsing the json file now and creating the directories as
-	 * well as copying the necessary files - start from here */
 	p_parse_json(jsnd);
 
-	/* free this resource once this function is getting its call stack
-	 * cleaned */
 	free(jsnd);
 }
 
@@ -442,9 +400,9 @@ void mkproject(struct project * restrict p)
 		printf("Dir exists\n");
 	} else {
 		printf("Creating the directory\n");
-		/* create the directory in the current working directory */
 		p_create_dir(p->pdn);
 	}
+	/* read the template and take action on the resources */
 	p_read_template(p);	/* read template later */
 }
 
