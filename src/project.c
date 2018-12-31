@@ -167,6 +167,81 @@ static void p_process_bdirs(const char * restrict dname,
 	p_create_dir(dpath);
 }
 
+static void p_copy_file(const char * restrict src,
+		const char * restrict dest)
+{
+	/*
+	 * implement the checks whether the source file exists or not
+	 * if it doesn't - exit the program
+	 */
+	if (!src && !dest) {
+		printf("Either source location or destination location has "
+				"not been provided\n");
+		return;
+	}
+
+	FILE *sfile = fopen(src, "rb");
+	FILE *dfile = fopen(dest, "ab");
+	void *d = NULL;
+
+	/* write the portion of the code for copying */
+	if (sfile && dfile) {
+		size_t n = p_get_filesize(src);
+		d = calloc(n, sizeof(size_t));
+		if (fread(d, sizeof(char), n , sfile) != n)
+			perror("File reading had errors");
+		(void)fwrite(d, sizeof(char), n, dfile);
+	}
+
+	fclose(dfile);
+	fclose(sfile);
+	free(d);
+}
+
+static void p_process_bfiles(const char * restrict fname,
+		struct project * restrict p)
+{
+	if (!fname && !p) {
+		printf("Either filename or the project structure instance "
+				"have not been provided\n");
+		return;
+	}
+
+	/* create the source filepath  */
+	printf("Filename provided : %s\n", fname);
+
+	/*
+	 * all the files for each project type has to be placed in the same
+	 * resource directory under the name of the project type. So, in order
+	 * for the resources of C to be copied, the files have to be placed
+	 * inside the <res_dir_path>/c/<files_here_specific_to_C_template>
+	 */
+
+	/* create the source filepath */
+	char sfpath[strlen(p->resd) + strlen(p->pt) + strlen(fname) + 1];
+	memset(sfpath, 0, sizeof(char));
+
+	strcat(sfpath, p->resd);
+	strcat(sfpath, p->pt);
+	strcat(sfpath, "/");
+	strcat(sfpath, fname);
+
+	/* check for the final name of the file */
+	printf("Source filepath finally formed : %s\n", sfpath);
+
+	/* start copying the files now */
+	char dfpath[strlen(p->pdn) + strlen(fname) + 2];
+	memset(dfpath, 0, sizeof(char));
+
+	strcat(dfpath, p->pdn);
+	strcat(dfpath, "/");
+	strcat(dfpath, fname);
+
+	printf("Destination filepath finally formed : %s\n", dfpath);
+
+	p_copy_file(sfpath, dfpath);
+}
+
 static void p_parse_json(const char * restrict jsd,
 		struct project * restrict p)
 {
@@ -227,12 +302,7 @@ static void p_parse_json(const char * restrict jsd,
 						t[pos].start, t[pos].end);
 				printf("After splicing of build files : %s\n",
 						splstr);
-				/* copy the respective files now */
-				/*
-				 * for the files : - as of now - only copy to
-				 * the root directory
-				 * copy the file in the root directory
-				 */
+				p_process_bfiles(splstr, p);
 				free(splstr);
 			}
 			f_dir_id = false;
@@ -427,7 +497,6 @@ void mkproject(struct project * restrict p)
 		printf("Creating the directory\n");
 		p_create_dir(p->pdn);
 	}
-	/* read the template and take action on the resources */
-	p_read_template(p);	/* read template later */
+	p_read_template(p);
 }
 
