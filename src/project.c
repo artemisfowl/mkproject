@@ -146,10 +146,37 @@ static char *strsplice(const char *s, int start, int end)
 	return spliced;
 }
 
-static void p_parse_json(const char * restrict jsd)
+static void p_process_bdirs(const char * restrict dname,
+		struct project * restrict p)
+{
+	if (!dname && !p) {
+		printf("Either directory name or project structure or both "
+				"have not been provided\n");
+	}
+
+	char dpath[strlen(p->pdn) + strlen(dname) + 2];
+	memset(dpath, 0, sizeof(char));
+	strcat(dpath, p->pdn);
+	strcat(dpath, "/");
+	strcat(dpath, dname);
+
+	/* check the path */
+	printf("Final path for bdir : %s\n", dpath);
+
+	/* create the directories */
+	p_create_dir(dpath);
+}
+
+static void p_parse_json(const char * restrict jsd,
+		struct project * restrict p)
 {
 	if (!jsd) {
-		printf("JSON data has nopt been provided");
+		printf("JSON data has not been provided");
+		return;
+	}
+
+	if (!p) {
+		printf("Project structure instance was not provided\n");
 		return;
 	}
 
@@ -159,7 +186,6 @@ static void p_parse_json(const char * restrict jsd)
 	jsmn_init(&jp);
 
 	num_tok = jsmn_parse(&jp, jsd, strlen(jsd), NULL, 0);
-	printf("Number of tokens found : %d\n", num_tok);
 
 	jsmntok_t t[num_tok];
 	jsmn_init(&jp);
@@ -176,25 +202,19 @@ static void p_parse_json(const char * restrict jsd)
 		bool f_bfiles_id = false;
 
 		if (jsoneq(jsd, &t[i], TEMPL_DIR_ID) == 0) {
-			printf("Found the %s node\n", TEMPL_DIR_ID);
 			i++;
 			f_dir_id = true;
 		} else if (jsoneq(jsd, &t[i], TEMPL_BUILD_ID) == 0) {
-			printf("Found the %s node\n", TEMPL_BUILD_ID);
 			i++;
 			f_bfiles_id = true;
 		}
 
 		if (f_dir_id) {
-			printf("Inside check for dir_id\n");
-
 			int pos = i + 1;
 			for (int cn = 0; cn < t[i].size; cn++, pos++) {
 				char *splstr = strsplice(jsd,
 						t[pos].start, t[pos].end);
-				printf("After splicing of dirs : %s\n",
-						splstr);
-				/* create the directories now */
+				p_process_bdirs(splstr, p);
 				free(splstr);
 			}
 			f_dir_id = false;
@@ -208,6 +228,11 @@ static void p_parse_json(const char * restrict jsd)
 				printf("After splicing of build files : %s\n",
 						splstr);
 				/* copy the respective files now */
+				/*
+				 * for the files : - as of now - only copy to
+				 * the root directory
+				 * copy the file in the root directory
+				 */
 				free(splstr);
 			}
 			f_dir_id = false;
@@ -389,7 +414,7 @@ void p_read_template(struct project * restrict p)
 
 	printf("JSON data : %s\n", jsnd);
 
-	p_parse_json(jsnd);
+	p_parse_json(jsnd, p);
 
 	free(jsnd);
 }
