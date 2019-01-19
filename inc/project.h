@@ -149,6 +149,6 @@ void p_read_template(struct project * restrict p);
  * @brief function to create and copy the files - main handler
  * @params [in] p is a pointer to a struct project instance
  */
-void mkproject(struct project * restrict p);
+void p_mkproject(struct project * restrict p);
 
 #endif

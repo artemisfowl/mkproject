@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 	printf("Name of the project : %s\n", p.pdn);
 
 	/* making the call to the final function */
-	mkproject(&p);
+	p_mkproject(&p);
 
 	/* free the resources before exiting */
 	p_free_res(&p);

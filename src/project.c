@@ -489,7 +489,7 @@ void p_read_template(struct project * restrict p)
         free(jsnd);
 }
 
-void mkproject(struct project * restrict p)
+void p_mkproject(struct project * restrict p)
 {
         if (p_dir_exists(p->pdn)) {
                 printf("Dir exists\n");
