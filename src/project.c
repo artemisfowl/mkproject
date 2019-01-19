@@ -137,7 +137,7 @@ static int p_jsoneq(const char *json, jsmntok_t *tok, const char *s)
         return -1;
 }
 
-static char *strsplice(const char *s, int start, int end)
+static char *p_strsplice(const char *s, int start, int end)
 {
         char *spliced = calloc(end - start + 1, sizeof(char));
         for (int m = start, l = 0; m < end; m++, l++)
@@ -287,7 +287,7 @@ static void p_parse_json(const char * restrict jsd,
                 if (f_dir_id) {
                         int pos = i + 1;
                         for (int cn = 0; cn < t[i].size; cn++, pos++) {
-                                char *splstr = strsplice(jsd,
+                                char *splstr = p_strsplice(jsd,
                                                 t[pos].start, t[pos].end);
                                 p_process_bdirs(splstr, p);
                                 free(splstr);
@@ -298,7 +298,7 @@ static void p_parse_json(const char * restrict jsd,
 
                         int pos = i + 1;
                         for (int cn = 0; cn < t[i].size; cn++, pos++) {
-                                char *splstr = strsplice(jsd,
+                                char *splstr = p_strsplice(jsd,
                                                 t[pos].start, t[pos].end);
                                 printf("After splicing of build files : %s\n",
                                                 splstr);
