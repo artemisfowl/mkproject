@@ -127,6 +127,7 @@ static char *p_read_file(const char * restrict fp, char *buf)
         return buf;
 }
 
+#if 0
 static int p_jsoneq(const char *json, jsmntok_t *tok, const char *s)
 {
         if (tok->type == JSMN_STRING &&
@@ -310,6 +311,7 @@ static void p_parse_json(const char * restrict jsd,
 
         }
 }
+#endif
 
 /* header functions */
 void p_display_usage(void)
@@ -412,7 +414,6 @@ void p_free_res(struct project * restrict p)
 
 int p_check_config_dir(const char *cl)
 {
-        /* return value */
         int r = 0;
 
         /* check if the mkproject directory exists or not */
@@ -464,6 +465,17 @@ void p_get_resd_loc(struct project * restrict p)
         free(cl);
 }
 
+void p_parse_jsdata(const char *jsd)
+{
+        if (!jsd) {
+                printf("JSON data has not been provided\n");
+                return;
+        }
+
+        printf("\nJSON data received : %s\n", jsd);
+
+        /* now add the helper functions - to be done today */
+}
 
 void p_read_template(struct project * restrict p)
 {
@@ -482,9 +494,18 @@ void p_read_template(struct project * restrict p)
         char *jsnd = NULL;
         jsnd = p_read_file(fp, jsnd);
 
-        printf("JSON data : %s\n", jsnd);
+        //printf("JSON data : %s\n", jsnd);
 
-        p_parse_json(jsnd, p);
+        /* first create the directories itself */
+        p_parse_jsdata(jsnd);
+
+        /* this is where the JSON data is being read into a file */
+        //p_parse_json(jsnd, p);
+
+        /*
+         * Most probably have to add in the code in here
+         * Also save the name of the file
+         */
 
         free(jsnd);
 }
