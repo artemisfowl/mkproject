@@ -137,10 +137,11 @@ int p_check_config_dir(const char *cl);
  */
 void p_get_resd_loc(struct project * restrict p);
 
-/*
+/**
  * @function p_parse_jsdata
  * @brief function to parse the json data and perform the operations on the
  * files and the directories specified
+ * @params [in] jsd is the json data to be processed by this function
  */
 void p_parse_jsdata(const char *jsd);
 
