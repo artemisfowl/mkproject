@@ -11,6 +11,11 @@
 #include <stdio.h>
 #include "../inc/project.h"
 
+/*
+ * TODO : Write a code for checking whether the format of the JSON file is
+ * correct or not
+ */
+
 int main(int argc, char *argv[])
 {
 	if (argc < MIN_ARGS || argc > MAX_ARGS) {
