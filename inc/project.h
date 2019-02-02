@@ -173,6 +173,15 @@ int p_jsoneq(const char *json, jsmntok_t *tok, const char *s);
  */
 int p_get_tokenc(const char *s);
 
+
+/*
+ * @function p_copy_file
+ * @brief function to copy the filename provided from source to destination
+ * @params [in] src is the source filepath
+ * @params [in] dest is the destination filepath
+ */
+void p_copy_file(const char * restrict src, const char * restrict dest);
+
 /**
  * @function p_process_bdirs
  * @brief function to create the directories from the configuration

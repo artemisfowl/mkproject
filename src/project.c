@@ -137,27 +137,6 @@ static char *p_strsplice(const char *s, int start, int end)
         return spliced;
 }
 
-static void p_process_bdirs(const char * restrict dname,
-                struct project * restrict p)
-{
-        if (!dname && !p) {
-                printf("Either directory name or project structure or both "
-                                "have not been provided\n");
-        }
-
-        char dpath[strlen(p->pdn) + strlen(dname) + 2];
-        memset(dpath, 0, sizeof(char));
-        strcat(dpath, p->pdn);
-        strcat(dpath, "/");
-        strcat(dpath, dname);
-
-        /* check the path */
-        printf("Final path for bdir : %s\n", dpath);
-
-        /* create the directories */
-        p_create_dir(dpath);
-}
-
 static void p_copy_file(const char * restrict src,
                 const char * restrict dest)
 {
@@ -302,6 +281,7 @@ static void p_parse_json(const char * restrict jsd,
         }
 }
 #endif
+
 
 /* header functions */
 void p_display_usage(void)
@@ -590,6 +570,36 @@ int p_process_bfiles(const char *s, struct project * restrict p)
         }
 
         return 1;
+}
+
+void p_copy_file(const char * restrict src, const char * restrict dest)
+{
+        /*
+         * implement the checks whether the source file exists or not
+         * if it doesn't - exit the program
+         */
+        if (!src && !dest) {
+                printf("Either source location or destination location has "
+                                "not been provided\n");
+                return;
+        }
+
+        FILE *sfile = fopen(src, "rb");
+        FILE *dfile = fopen(dest, "ab");
+        void *d = NULL;
+
+        /* write the portion of the code for copying */
+        if (sfile && dfile) {
+                size_t n = p_get_filesize(src);
+                d = calloc(n, sizeof(size_t));
+                if (fread(d, sizeof(char), n , sfile) != n)
+                        perror("File reading had errors");
+                (void)fwrite(d, sizeof(char), n, dfile);
+        }
+
+        fclose(dfile);
+        fclose(sfile);
+        free(d);
 }
 
 int p_process_bdirs(const char *s, struct project * restrict p)
