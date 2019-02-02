@@ -138,12 +138,56 @@ int p_check_config_dir(const char *cl);
 void p_get_resd_loc(struct project * restrict p);
 
 /**
+ * @function p_strsplice
+ * @brief function to splice the given string within the given boundaries
+ * @params [in] s is the string containing the substring to be spliced out
+ * @params [in] a is the buffer in which the string has to be put in
+ * @params [in] start is the starting index of the substring
+ * @params [in] end is the ending index of the substring
+ */
+void p_strsplice(const char *s, char *a, int start, int end);
+
+/**
  * @function p_parse_jsdata
  * @brief function to parse the json data and perform the operations on the
  * files and the directories specified
  * @params [in] jsd is the json data to be processed by this function
+ * @params [in] p is a pointer to the project structure instance/object
  */
-void p_parse_jsdata(const char *jsd);
+void p_parse_jsdata(const char *jsd, struct project * restrict p);
+
+/**
+ * @function p_jsoneq
+ * @brief function to check if the tag is present in the JSON structure or not
+ * @params [in] json is the JSON string
+ * @params [in] tok is the token which will be matched
+ * @params [in] s is the name of the tag to be matched
+ *
+ */
+int p_jsoneq(const char *json, jsmntok_t *tok, const char *s);
+
+/**
+ * @function p_get_tokenc
+ * @brief function to return the number of tokens found by the JSMN parser
+ * @params [in] s is the JSON string for which the token count will be returned
+ */
+int p_get_tokenc(const char *s);
+
+/**
+ * @function p_process_bdirs
+ * @brief function to create the directories from the configuration
+ * @params [in] s is the string containing the names of the directories
+ * @params [in] p is a pointer to the project structure instance/object
+ */
+int p_process_bdirs(const char *s, struct project * restrict p);
+
+/**
+ * @function p_process_bfiles
+ * @brief function to copy the respective files from the configuration
+ * @params [in] s is the string containing the names of the directories
+ * @params [in] p is a pointer to the project structure instance/object
+ */
+int p_process_bfiles(const char *s, struct project * restrict p);
 
 /**
  * @function p_read_template

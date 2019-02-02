@@ -128,16 +128,6 @@ static char *p_read_file(const char * restrict fp, char *buf)
 }
 
 #if 0
-static int p_jsoneq(const char *json, jsmntok_t *tok, const char *s)
-{
-        if (tok->type == JSMN_STRING &&
-                        (int)strlen(s) == tok->end - tok->start &&
-                        strncmp(json + tok->start, s,
-                                tok->end - tok->start) == 0)
-                return 0;
-        return -1;
-}
-
 static char *p_strsplice(const char *s, int start, int end)
 {
         char *spliced = calloc(end - start + 1, sizeof(char));
@@ -465,16 +455,191 @@ void p_get_resd_loc(struct project * restrict p)
         free(cl);
 }
 
-void p_parse_jsdata(const char *jsd)
+int p_jsoneq(const char *json, jsmntok_t *tok, const char *s)
 {
-        if (!jsd) {
-                printf("JSON data has not been provided\n");
+        if (tok->type == JSMN_STRING &&
+                        (int)strlen(s) == tok->end - tok->start &&
+                        strncmp(json + tok->start, s,
+                                tok->end - tok->start) == 0)
+                return 0;
+        return -1;
+}
+
+int p_get_tokenc(const char *s) /* still a un-used function */
+{
+        if (!s) {
+                printf("JSON string has not been provided\n");
+                return 0;
+        }
+
+        jsmn_parser jp;
+        jsmn_init(&jp);
+        return jsmn_parse(&jp, s, strlen(s), NULL, 0);
+}
+
+jsmntok_t p_get_token_value(const char *jsd, const char *tok_name)
+{
+        jsmntok_t r;
+        r.end = 0;
+        r.size = 0;
+        r.start = 0;
+        r.type = JSMN_UNDEFINED;
+
+        if (!jsd && !tok_name) {
+                printf("JSON data and/or token name has nto been provided\n");
+                return r;
+        }
+
+        /* start the processing and return the value to the calling function */
+        jsmn_parser jp;
+        jsmn_init(&jp);
+        int nt = p_get_tokenc(jsd);
+        if (!nt) {
+                printf("No tokens found\n");
+                return r;
+        }
+        jsmntok_t t[nt];
+        nt = jsmn_parse(&jp, jsd, strlen(jsd), t, nt);
+        if (nt < 1 || t[0].type != JSMN_OBJECT) {
+                printf("Structure of the JSON object is not proper\n");
+                return r;
+        }
+        for (int i = 1; i < nt; i++) {
+                if (p_jsoneq(jsd, &t[i], tok_name) == 0) {
+                        r = t[i + 1];
+                        break;
+                }
+        }
+
+        return r;
+}
+
+void p_strsplice(const char *s, char *a, int start, int end)
+{
+        for (int m = start, l = 0; m < end; m++, l++)
+                a[l] = s[m];
+        a[end - start] = '\0';
+}
+
+void p_parse_jsdata(const char *jsd, struct project * restrict p)
+{
+        if (!jsd && !p) {
+                printf("JSON data and/or project structure instance"
+                                " has not been provided\n");
                 return;
         }
 
         printf("\nJSON data received : %s\n", jsd);
 
-        /* now add the helper functions - to be done today */
+        /* directories */
+        jsmntok_t tok_bdirs = p_get_token_value(jsd, TEMPL_DIR_ID);
+        char bdir_str[tok_bdirs.end - tok_bdirs.start + 1];
+        memset(bdir_str, 0, sizeof(char));
+        //char *bdir_str = p_strsplice(jsd, tok_bdirs.start, tok_bdirs.end);
+        p_strsplice(jsd, bdir_str, tok_bdirs.start, tok_bdirs.end);
+        p_process_bdirs(bdir_str, p);
+
+        /* now get the build files to be processed */
+        jsmntok_t tok_bfiles = p_get_token_value(jsd, TEMPL_BUILD_ID);
+        char bfiles_str[tok_bfiles.end - tok_bfiles.start + 1];
+        memset(bfiles_str, 0, sizeof(char));
+        p_strsplice(jsd, bfiles_str, tok_bfiles.start, tok_bfiles.end);
+        p_process_bfiles(bfiles_str, p);
+}
+
+int p_process_bfiles(const char *s, struct project * restrict p)
+{
+        /*
+         * 1 -> success
+         * 0 -> failure
+         */
+        if (!s && !p) {
+                printf("JSON data and/or project structure instance"
+                                " has not been provided\n");
+                return 0;
+        }
+        printf("Build files JSON : %s\n", s);
+
+        int nt = p_get_tokenc(s);
+        printf("Number of tokens found : %d\n", nt);
+        if (!nt) {
+                printf("No tokens found\n");
+                return 0;
+        }
+        jsmn_parser jp;
+        jsmn_init(&jp);
+        jsmntok_t t[nt];
+        nt = jsmn_parse(&jp, s, strlen(s), t, nt);
+        if (nt < 1 || t[0].type != JSMN_OBJECT) {
+                printf("Structure of the JSON object is not proper\n");
+                return 0;
+        }
+        for (int i = 1; i < nt; i += 2) {
+                /* key == k, value == v */
+                char k[t[i].end - t[i].start + 1];
+                char v[t[i + 1].end - t[i + 1].start + 1];
+
+                /* splice the string */
+                p_strsplice(s, k, t[i].start, t[i].end);
+                p_strsplice(s, v, t[i + 1].start, t[i + 1].end);
+
+                /* print the key, value pair */
+                printf("Key : %s, Value : %s\n", k, v);
+
+                /* copy the files now to the proper directories */
+        }
+
+        return 1;
+}
+
+int p_process_bdirs(const char *s, struct project * restrict p)
+{
+        /*
+         * 1 -> success
+         * 0 -> failure
+         */
+        if (!s && !p) {
+                printf("JSON data and/or project structure instance"
+                                " has not been provided\n");
+                return 0;
+        }
+
+        /* JSON data to be parsed */
+        printf("Directory string : %s\n", s);
+
+        /* parse this input string and create the directories - start working
+         * on this - addition of code will be here onward */
+
+        /* starting to reparse the input string */
+        int nt = p_get_tokenc(s);
+        if (!nt) {
+                printf("No tokens found\n");
+                return 0;
+        }
+        printf("Number of tokens found : %d\n", nt);
+
+        jsmn_parser jp;
+        jsmn_init(&jp);
+        jsmntok_t t[nt];
+        nt = jsmn_parse(&jp, s, strlen(s), t, nt);
+        if (nt < 1 || t[0].type != JSMN_ARRAY) {
+                printf("Structure of the JSON object is not proper\n");
+                return 0;
+        }
+
+        for (int i = 1; i < nt; i++) {
+                char dname[t[i].end - t[i].end + 1];
+                memset(dname, 0, sizeof(char));
+                p_strsplice(s, dname, t[i].start, t[i].end);
+                char dpath[strlen(p->pdn) + strlen(dname) + 2];
+                memset(dpath, 0, sizeof(char));
+                strcat(dpath, p->pdn);
+                strcat(dpath, "/");
+                strcat(dpath, dname);
+                p_create_dir(dpath);
+        }
+
+        return 1;
 }
 
 void p_read_template(struct project * restrict p)
@@ -497,7 +662,7 @@ void p_read_template(struct project * restrict p)
         //printf("JSON data : %s\n", jsnd);
 
         /* first create the directories itself */
-        p_parse_jsdata(jsnd);
+        p_parse_jsdata(jsnd, p);
 
         /* this is where the JSON data is being read into a file */
         //p_parse_json(jsnd, p);
