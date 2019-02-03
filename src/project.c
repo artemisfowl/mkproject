@@ -127,122 +127,6 @@ static char *p_read_file(const char * restrict fp, char *buf)
         return buf;
 }
 
-#if 0
-static void p_process_bfiles(const char * restrict fname,
-                struct project * restrict p)
-{
-        if (!fname && !p) {
-                printf("Either filename or the project structure instance "
-                                "have not been provided\n");
-                return;
-        }
-
-        /* create the source filepath  */
-        printf("Filename provided : %s\n", fname);
-
-        /*
-         * all the files for each project type has to be placed in the same
-         * resource directory under the name of the project type. So, in order
-         * for the resources of C to be copied, the files have to be placed
-         * inside the <res_dir_path>/c/<files_here_specific_to_C_template>
-         */
-
-        /* create the source filepath */
-        char sfpath[strlen(p->resd) + strlen(p->pt) + strlen(fname) + 1];
-        memset(sfpath, 0, sizeof(char));
-
-        strcat(sfpath, p->resd);
-        strcat(sfpath, p->pt);
-        strcat(sfpath, "/");
-        strcat(sfpath, fname);
-
-        /* check for the final name of the file */
-        printf("Source filepath finally formed : %s\n", sfpath);
-
-        /* start copying the files now */
-        char dfpath[strlen(p->pdn) + strlen(fname) + 2];
-        memset(dfpath, 0, sizeof(char));
-
-        strcat(dfpath, p->pdn);
-        strcat(dfpath, "/");
-        strcat(dfpath, fname);
-
-        printf("Destination filepath finally formed : %s\n", dfpath);
-
-        p_copy_file(sfpath, dfpath);
-}
-
-static void p_parse_json(const char * restrict jsd,
-                struct project * restrict p)
-{
-        if (!jsd) {
-                printf("JSON data has not been provided");
-                return;
-        }
-
-        if (!p) {
-                printf("Project structure instance was not provided\n");
-                return;
-        }
-
-        int num_tok = 0;
-        jsmn_parser jp;
-
-        jsmn_init(&jp);
-
-        num_tok = jsmn_parse(&jp, jsd, strlen(jsd), NULL, 0);
-
-        jsmntok_t t[num_tok];
-        jsmn_init(&jp);
-
-        num_tok = jsmn_parse(&jp, jsd, strlen(jsd), t, num_tok);
-
-        if (num_tok < 1 || t[0].type != JSMN_OBJECT) {
-                printf("Object expected\n");
-                return;
-        }
-
-        for (int i = 1; i < num_tok; i++) {
-                bool f_dir_id = false;
-                bool f_bfiles_id = false;
-
-                if (p_jsoneq(jsd, &t[i], TEMPL_DIR_ID) == 0) {
-                        i++;
-                        f_dir_id = true;
-                } else if (p_jsoneq(jsd, &t[i], TEMPL_BUILD_ID) == 0) {
-                        i++;
-                        f_bfiles_id = true;
-                }
-
-                if (f_dir_id) {
-                        int pos = i + 1;
-                        for (int cn = 0; cn < t[i].size; cn++, pos++) {
-                                char *splstr = p_strsplice(jsd,
-                                                t[pos].start, t[pos].end);
-                                p_process_bdirs(splstr, p);
-                                free(splstr);
-                        }
-                        f_dir_id = false;
-                } else if (f_bfiles_id) {
-                        printf("Inside check for bfiles_id\n");
-
-                        int pos = i + 1;
-                        for (int cn = 0; cn < t[i].size; cn++, pos++) {
-                                char *splstr = p_strsplice(jsd,
-                                                t[pos].start, t[pos].end);
-                                printf("After splicing of build files : %s\n",
-                                                splstr);
-                                p_process_bfiles(splstr, p);
-                                free(splstr);
-                        }
-                        f_dir_id = false;
-                }
-
-        }
-}
-#endif
-
-
 /* header functions */
 void p_display_usage(void)
 {
@@ -258,22 +142,15 @@ void p_display_usage(void)
 
 void p_setup(struct project * restrict p)
 {
+        /* should return success or failure status */
         if (!p) {
                 printf("No structure provided\n");
                 return;
         }
 
         /* too many strings - will be reducing them one by one */
-        p->ptype = C;
         p->rdp_t = false;
         p->pt = NULL;
-        p->cwd = NULL;
-        p->prwd = NULL;
-        p->src = NULL;
-        p->inc = NULL;
-        p->nfiles = 0;
-
-        /* new fields */
         p->resd = NULL;
         p->pdn = NULL;
 }
@@ -335,11 +212,6 @@ void p_free_res(struct project * restrict p)
         free(p->resd);
         free(p->pt);
         free(p->pdn);
-
-        free(p->cwd);
-        free(p->inc);
-        free(p->prwd);
-        free(p->src);
 }
 
 int p_check_config_dir(const char *cl)
@@ -374,7 +246,6 @@ void p_get_resd_loc(struct project * restrict p)
         cl = realloc(cl, (strlen(h) + strlen(CONFIG_LOC)
                                 + strlen(CONFIG_FILE) + 1) * sizeof(char));
         cl = strcat(cl, CONFIG_FILE);
-        printf("Config file final location : %s\n", cl);
 
         if (access(cl, F_OK) != -1) {
                 if ((p_get_filesize(cl) == 0) ||
@@ -647,10 +518,6 @@ int p_process_bdirs(const char *s, struct project * restrict p)
 
 void p_read_template(struct project * restrict p)
 {
-        printf("Resource directory location from main func : %s\n", p->resd);
-
-        printf("\nProject type as specified : %s\n", p->pt);
-
         char fp[strlen(p->resd) + strlen(p->pt) + strlen(RES_EXTENSION) + 1];
         memset(fp, 0, strlen(p->resd) + strlen(p->pt) +
                         strlen(RES_EXTENSION) + 1);
@@ -662,19 +529,7 @@ void p_read_template(struct project * restrict p)
         char *jsnd = NULL;
         jsnd = p_read_file(fp, jsnd);
 
-        //printf("JSON data : %s\n", jsnd);
-
-        /* first create the directories itself */
         p_parse_jsdata(jsnd, p);
-
-        /* this is where the JSON data is being read into a file */
-        //p_parse_json(jsnd, p);
-
-        /*
-         * Most probably have to add in the code in here
-         * Also save the name of the file
-         */
-
         free(jsnd);
 }
 
@@ -683,7 +538,6 @@ void p_mkproject(struct project * restrict p)
         if (p_dir_exists(p->pdn)) {
                 printf("Dir exists\n");
         } else {
-                printf("Creating the directory\n");
                 p_create_dir(p->pdn);
         }
         p_read_template(p);

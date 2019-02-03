@@ -71,18 +71,10 @@ enum project_t {	/* this might be deprecated later */
 
 /* structure */
 struct project {
-	enum project_t ptype;
-	int rdp_t;
+	int rdp_t;      /* read project type flag */
 	char *pt;	/* project type name - dynamicity is the purpose */
 	char *resd;	/* resource directory location */
 	char *pdn;	/* project directory name or the project name */
-
-	/* directory holding fields */
-	char *cwd;
-	char *prwd;
-	char *src;
-	char *inc;
-	int nfiles;	/* number of files to be copied */
 };
 
 /**
