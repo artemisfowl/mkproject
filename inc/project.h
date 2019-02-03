@@ -57,6 +57,10 @@
 #define TEMPL_BUILD_ID "build_files"
 #endif
 
+#ifndef ROOT_DIR
+#define ROOT_DIR "root"
+#endif
+
 /* enum */
 enum project_t {	/* this might be deprecated later */
 	C,
@@ -180,7 +184,7 @@ int p_get_tokenc(const char *s);
  * @params [in] src is the source filepath
  * @params [in] dest is the destination filepath
  */
-void p_copy_file(const char * restrict src, const char * restrict dest);
+void p_copy_file(const char *src, const char *dest);
 
 /**
  * @function p_process_bdirs

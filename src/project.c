@@ -128,46 +128,6 @@ static char *p_read_file(const char * restrict fp, char *buf)
 }
 
 #if 0
-static char *p_strsplice(const char *s, int start, int end)
-{
-        char *spliced = calloc(end - start + 1, sizeof(char));
-        for (int m = start, l = 0; m < end; m++, l++)
-                spliced[l] = s[m];
-        spliced[end - start] = '\0';
-        return spliced;
-}
-
-static void p_copy_file(const char * restrict src,
-                const char * restrict dest)
-{
-        /*
-         * implement the checks whether the source file exists or not
-         * if it doesn't - exit the program
-         */
-        if (!src && !dest) {
-                printf("Either source location or destination location has "
-                                "not been provided\n");
-                return;
-        }
-
-        FILE *sfile = fopen(src, "rb");
-        FILE *dfile = fopen(dest, "ab");
-        void *d = NULL;
-
-        /* write the portion of the code for copying */
-        if (sfile && dfile) {
-                size_t n = p_get_filesize(src);
-                d = calloc(n, sizeof(size_t));
-                if (fread(d, sizeof(char), n , sfile) != n)
-                        perror("File reading had errors");
-                (void)fwrite(d, sizeof(char), n, dfile);
-        }
-
-        fclose(dfile);
-        fclose(sfile);
-        free(d);
-}
-
 static void p_process_bfiles(const char * restrict fname,
                 struct project * restrict p)
 {
@@ -541,7 +501,6 @@ int p_process_bfiles(const char *s, struct project * restrict p)
         printf("Build files JSON : %s\n", s);
 
         int nt = p_get_tokenc(s);
-        printf("Number of tokens found : %d\n", nt);
         if (!nt) {
                 printf("No tokens found\n");
                 return 0;
@@ -554,6 +513,14 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                 printf("Structure of the JSON object is not proper\n");
                 return 0;
         }
+
+        /*
+         * all the files for each project type has to be placed in the same
+         * resource directory under the name of the project type. So, in order
+         * for the resources of C to be copied, the files have to be placed
+         * inside the <res_dir_path>/c/<files_here_specific_to_C_json>
+         */
+
         for (int i = 1; i < nt; i += 2) {
                 /* key == k, value == v */
                 char k[t[i].end - t[i].start + 1];
@@ -564,15 +531,41 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                 p_strsplice(s, v, t[i + 1].start, t[i + 1].end);
 
                 /* print the key, value pair */
-                printf("Key : %s, Value : %s\n", k, v);
+                char src[strlen(p->resd) + strlen(p->pt) + strlen(k) + 2];
+                memset(src, 0, sizeof(char));
+                strcat(src, p->resd);
+                strcat(src, p->pt);
+                strcat(src, "/");
+                strcat(src, k);
 
-                /* copy the files now to the proper directories */
+                /* first form the source filepath */
+                if (!strcmp(v, ROOT_DIR)) {
+                        char dest[strlen(p->pdn) + strlen(k) + 2];
+                        memset(dest, 0, sizeof(char));
+                        strcat(dest, p->pdn);
+                        strcat(dest, "/");
+                        strcat(dest, k);
+
+                        /* copy the file from the source to the destination */
+                        p_copy_file(src, dest);
+                } else {
+                        char dest[strlen(p->pdn) + strlen(v) + strlen(k) + 3];
+                        memset(dest, 0, sizeof(char));
+                        strcat(dest, p->pdn);
+                        strcat(dest, "/");
+                        strcat(dest, v);
+                        strcat(dest, "/");
+                        strcat(dest, k);
+
+                        /* copy the file from the source to the destination */
+                        p_copy_file(src, dest);
+                }
         }
 
         return 1;
 }
 
-void p_copy_file(const char * restrict src, const char * restrict dest)
+void p_copy_file(const char *src, const char *dest)
 {
         /*
          * implement the checks whether the source file exists or not
