@@ -11,11 +11,6 @@
 #include <stdio.h>
 #include "../inc/project.h"
 
-/*
- * TODO : Write a code for checking whether the format of the JSON file is
- * correct or not
- */
-
 int main(int argc, char *argv[])
 {
 	if (argc < MIN_ARGS || argc > MAX_ARGS) {
@@ -36,16 +31,24 @@ int main(int argc, char *argv[])
 	argv++;
 
 	struct project p;
-	p_setup(&p);
+	if (p_setup(&p)) {
+                perror("p_setup failed\n");
+		exit(EXIT_FAILURE);
+        }
 
 
 	/* count till argc drops */
 	while (argc--) {
-		/* put a check if -t is the last argument or not */
-		p_parse_flags(*argv, &p);
+		if (p_parse_flags(*argv, &p)) {
+                        perror("p_parse_flags failed\n");
+                        exit(EXIT_FAILURE);
+                }
 		argv++;
 		if (p.rdp_t) {
-			p_assign_ptype(*argv, &p);
+			if (p_assign_ptype(*argv, &p)) {
+                                perror("p_assign_ptype failed\n");
+                                exit(EXIT_FAILURE);
+                        }
 			p.rdp_t = false;
 
 			/* point to the project name and then exit the loop */
@@ -54,22 +57,10 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* read the configuration file and store the resource directory
-	 * location */
 	p_get_resd_loc(&p);
-
-	/* now based on the project type, read the specific json file and then
-	 * copy the necessary files - this is where the code for parsing the
-	 * JSON files need to be polished more - working on this today */
-
-	/* save the name of the project in the project structure */
 	p.pdn = strdup(*argv);
-	printf("Name of the project : %s\n", p.pdn);
-
-	/* making the call to the final function */
 	p_mkproject(&p);
 
-	/* free the resources before exiting */
 	p_free_res(&p);
 
 	return 0;

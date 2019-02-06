@@ -112,9 +112,14 @@ static int p_create_dir(const char *dp)
 
 static char *p_read_file(const char * restrict fp, char *buf)
 {
+        FILE *f = fopen(fp, "r");
+        if (!f) {
+                perror("Template file doesn't exist\n");
+                return NULL;
+        }
+
         buf = calloc(p_get_filesize(fp) + 1, sizeof(char));
 
-        FILE *f = fopen(fp, "r");
         char *t = NULL;
         ssize_t nread = 0;
         size_t n = 0;
@@ -140,27 +145,35 @@ void p_display_usage(void)
                         "mkproject -t c c_project_name\n");
 }
 
-void p_setup(struct project * restrict p)
+int p_setup(struct project * restrict p)
 {
-        /* should return success or failure status */
+        /*
+         * 1 -> failure
+         * 0 -> success
+         */
         if (!p) {
                 printf("No structure provided\n");
-                return;
+                return 1;
         }
 
-        /* too many strings - will be reducing them one by one */
         p->rdp_t = false;
         p->pt = NULL;
         p->resd = NULL;
         p->pdn = NULL;
+
+        return 0;
 }
 
-void p_parse_flags(const char * restrict s, struct project * restrict p)
+int p_parse_flags(const char * restrict s, struct project * restrict p)
 {
+        /*
+         * 0 -> success
+         * 1 -> failure
+         */
         if (strlen(s) != FLAG_LEN || !p) {
-                printf("Length of arg_str is not proper or the"
+                printf("Length of arg_str is not proper or the "
                                 "project structure instance not provided\n");
-                return;
+                return 1;
         }
 
         if (*s == '-')
@@ -168,20 +181,20 @@ void p_parse_flags(const char * restrict s, struct project * restrict p)
         switch(*s) {
                 case 'h':
                         p_display_usage();
-                        exit(EXIT_SUCCESS);
+                        return 1;
                 case 'v':
                         p_display_version();
-                        exit(EXIT_SUCCESS);
+                        return 1;
                 case 'c':
                         p_display_config_help();
-                        exit(EXIT_SUCCESS);
+                        return 1;
                 case 't':
                         p->rdp_t = true;
-                        break;
+                        return 0;
                 default:
                         printf("Unrecognised option\n");
                         p_display_usage();
-                        exit(EXIT_SUCCESS);
+                        return 1;
         }
 }
 
@@ -190,15 +203,16 @@ void p_display_version(void)
         printf("mkproject version : %d.%d\n", VER_MAJ_NUM, VER_MIN_NUM);
 }
 
-void p_assign_ptype(const char * restrict s, struct project * restrict p)
+int p_assign_ptype(const char * restrict s, struct project * restrict p)
 {
         if (!s && !p) {
                 printf("Type of project or "
                                 "project struct instance not provided\n");
-                return;
+                return 1;
         }
 
         p->pt = strdup(s);
+        return 0;
 }
 
 void p_free_res(struct project * restrict p)
@@ -529,7 +543,11 @@ void p_read_template(struct project * restrict p)
         char *jsnd = NULL;
         jsnd = p_read_file(fp, jsnd);
 
-        p_parse_jsdata(jsnd, p);
+        /* what happens when the template file is written in a wrong way? */
+
+        if (jsnd)
+                p_parse_jsdata(jsnd, p);
+
         free(jsnd);
 }
 

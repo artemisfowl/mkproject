@@ -9,5 +9,5 @@
 #endif
 
 #ifndef VER_MIN_NUM
-#define VER_MIN_NUM 0
+#define VER_MIN_NUM 1
 #endif

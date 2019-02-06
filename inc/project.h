@@ -88,7 +88,7 @@ void p_display_usage(void);
  * @brief function to initialize the fields for the struct project
  * @params [in] p is a pointer to a struct project instance
  */
-void p_setup(struct project * restrict p);
+int p_setup(struct project * restrict p);
 
 /**
  * @function p_parse_flags
@@ -96,7 +96,7 @@ void p_setup(struct project * restrict p);
  * @params [in] s is a pointer to the string containing the value of flags
  * @params [in] p is a pointer to a struct project instance
  */
-void p_parse_flags(const char * restrict s, struct project * restrict p);
+int p_parse_flags(const char * restrict s, struct project * restrict p);
 
 /**
  * @function p_display_version
@@ -110,7 +110,7 @@ void p_display_version(void);
  * @params [in] s pointer to the project type string
  * @params [in] p is a pointer to a struct project instance
  */
-void p_assign_ptype(const char * restrict s, struct project * restrict p);
+int p_assign_ptype(const char * restrict s, struct project * restrict p);
 
 /**
  * @function p_free_resources
