@@ -244,7 +244,7 @@ int p_check_config_dir(const char *cl)
         return r;
 }
 
-void p_get_resd_loc(struct project * restrict p)
+int p_get_resd_loc(struct project * restrict p)
 {
         char *h = getenv(USER_HOME);
         char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
@@ -262,6 +262,7 @@ void p_get_resd_loc(struct project * restrict p)
         cl = strcat(cl, CONFIG_FILE);
 
         if (access(cl, F_OK) != -1) {
+                /* file exists */
                 if ((p_get_filesize(cl) == 0) ||
                                 !(p->resd = p_read_config(cl))) {
                         printf("No configuration present in the file\n"
@@ -274,10 +275,14 @@ void p_get_resd_loc(struct project * restrict p)
                         exit(EXIT_SUCCESS);
                 }
         } else {
+                /* file doesn't exist - create an empty file */
                 p_write_file(cl, NULL);
+                free(cl);
+                return 1;
         }
 
         free(cl);
+        return 0;
 }
 
 int p_jsoneq(const char *json, jsmntok_t *tok, const char *s)
@@ -360,7 +365,6 @@ void p_parse_jsdata(const char *jsd, struct project * restrict p)
         jsmntok_t tok_bdirs = p_get_token_value(jsd, TEMPL_DIR_ID);
         char bdir_str[tok_bdirs.end - tok_bdirs.start + 1];
         memset(bdir_str, 0, sizeof(char));
-        //char *bdir_str = p_strsplice(jsd, tok_bdirs.start, tok_bdirs.end);
         p_strsplice(jsd, bdir_str, tok_bdirs.start, tok_bdirs.end);
         p_process_bdirs(bdir_str, p);
 
@@ -423,6 +427,10 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                 strcat(src, "/");
                 strcat(src, k);
 
+                /* implement check for the directory which will be destination
+                 * - this will be only required for the one which is not going
+                 *   to the root directory*/
+
                 /* first form the source filepath */
                 if (!strcmp(v, ROOT_DIR)) {
                         char dest[strlen(p->pdn) + strlen(k) + 2];
@@ -431,9 +439,24 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                         strcat(dest, "/");
                         strcat(dest, k);
 
-                        /* copy the file from the source to the destination */
                         p_copy_file(src, dest);
                 } else {
+                        printf("Source file : %s\n", src);
+                        /* implement directory check */
+                        char dest_dir[strlen(p->pdn) + strlen(v) + 2];
+                        memset(dest_dir, 0, sizeof(char));
+                        strcat(dest_dir, p->pdn);
+                        strcat(dest_dir, "/");
+                        strcat(dest_dir, v);
+                        strcat(dest_dir, "/");
+
+                        if (!p_dir_exists(dest_dir)) {
+                                printf("%s : directory not added in the dirs"
+                                                " list\n",
+                                                dest_dir);
+                                return 0;
+                        }
+
                         char dest[strlen(p->pdn) + strlen(v) + strlen(k) + 3];
                         memset(dest, 0, sizeof(char));
                         strcat(dest, p->pdn);
@@ -442,7 +465,6 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                         strcat(dest, "/");
                         strcat(dest, k);
 
-                        /* copy the file from the source to the destination */
                         p_copy_file(src, dest);
                 }
         }
@@ -463,6 +485,12 @@ void p_copy_file(const char *src, const char *dest)
         }
 
         FILE *sfile = fopen(src, "rb");
+        if (!sfile) {
+                perror("fopen failed");
+                return;
+        }
+        /* check if the dir exists - if not - return the control from that
+         * check */
         FILE *dfile = fopen(dest, "ab");
         void *d = NULL;
 
@@ -494,9 +522,6 @@ int p_process_bdirs(const char *s, struct project * restrict p)
 
         /* JSON data to be parsed */
         printf("Directory string : %s\n", s);
-
-        /* parse this input string and create the directories - start working
-         * on this - addition of code will be here onward */
 
         /* starting to reparse the input string */
         int nt = p_get_tokenc(s);

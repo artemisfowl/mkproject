@@ -131,7 +131,7 @@ int p_check_config_dir(const char *cl);
  * @brief function to get the resource directory location
  * @params [in] p is a pointer to a struct project instance
  */
-void p_get_resd_loc(struct project * restrict p);
+int p_get_resd_loc(struct project * restrict p);
 
 /**
  * @function p_strsplice

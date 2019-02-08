@@ -57,9 +57,17 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	p_get_resd_loc(&p);
-	p.pdn = strdup(*argv);
-	p_mkproject(&p);
+        /* need a return type from this function */
+	if (p_get_resd_loc(&p)) {
+                /* failure case - dummy file has been created without any
+                 * configuration data */
+                printf("Configuration file has been created - empty content\n");
+        } else {
+                /* configuration file exists already - may have configuration
+                 * data */
+                p.pdn = strdup(*argv);
+                p_mkproject(&p);
+        }
 
 	p_free_res(&p);
 
