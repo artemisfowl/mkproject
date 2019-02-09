@@ -364,14 +364,14 @@ void p_parse_jsdata(const char *jsd, struct project * restrict p)
         /* directories */
         jsmntok_t tok_bdirs = p_get_token_value(jsd, TEMPL_DIR_ID);
         char bdir_str[tok_bdirs.end - tok_bdirs.start + 1];
-        memset(bdir_str, 0, sizeof(char));
+        memset(bdir_str, 0, tok_bdirs.end - tok_bdirs.start + 1);
         p_strsplice(jsd, bdir_str, tok_bdirs.start, tok_bdirs.end);
         p_process_bdirs(bdir_str, p);
 
         /* now get the build files to be processed */
         jsmntok_t tok_bfiles = p_get_token_value(jsd, TEMPL_BUILD_ID);
         char bfiles_str[tok_bfiles.end - tok_bfiles.start + 1];
-        memset(bfiles_str, 0, sizeof(char));
+        memset(bfiles_str, 0, tok_bfiles.end - tok_bfiles.start + 1);
         p_strsplice(jsd, bfiles_str, tok_bfiles.start, tok_bfiles.end);
         p_process_bfiles(bfiles_str, p);
 }
@@ -421,7 +421,7 @@ int p_process_bfiles(const char *s, struct project * restrict p)
 
                 /* print the key, value pair */
                 char src[strlen(p->resd) + strlen(p->pt) + strlen(k) + 2];
-                memset(src, 0, sizeof(char));
+                memset(src, 0, strlen(p->resd) + strlen(p->pt) + strlen(k) + 2);
                 strcat(src, p->resd);
                 strcat(src, p->pt);
                 strcat(src, "/");
@@ -434,7 +434,7 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                 /* first form the source filepath */
                 if (!strcmp(v, ROOT_DIR)) {
                         char dest[strlen(p->pdn) + strlen(k) + 2];
-                        memset(dest, 0, sizeof(char));
+                        memset(dest, 0, strlen(p->pdn) + strlen(k) + 2);
                         strcat(dest, p->pdn);
                         strcat(dest, "/");
                         strcat(dest, k);
@@ -443,12 +443,13 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                 } else {
                         printf("Source file : %s\n", src);
                         /* implement directory check */
-                        char dest_dir[strlen(p->pdn) + strlen(v) + 2];
-                        memset(dest_dir, 0, sizeof(char));
+                        char dest_dir[strlen(p->pdn) + strlen(v) + 3];
+                        memset(dest_dir, 0, strlen(p->pdn) + strlen(v) + 3);
                         strcat(dest_dir, p->pdn);
                         strcat(dest_dir, "/");
                         strcat(dest_dir, v);
                         strcat(dest_dir, "/");
+                        dest_dir[strlen(p->pdn) + strlen(v) + 3] = '\0';
 
                         if (!p_dir_exists(dest_dir)) {
                                 printf("%s : directory not added in the dirs"
@@ -458,7 +459,8 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                         }
 
                         char dest[strlen(p->pdn) + strlen(v) + strlen(k) + 3];
-                        memset(dest, 0, sizeof(char));
+                        memset(dest, 0, strlen(p->pdn) + strlen(v) +
+                                        strlen(k) + 3);
                         strcat(dest, p->pdn);
                         strcat(dest, "/");
                         strcat(dest, v);
@@ -542,10 +544,10 @@ int p_process_bdirs(const char *s, struct project * restrict p)
 
         for (int i = 1; i < nt; i++) {
                 char dname[t[i].end - t[i].end + 1];
-                memset(dname, 0, sizeof(char));
+                memset(dname, 0, t[i].end - t[i].end + 1);
                 p_strsplice(s, dname, t[i].start, t[i].end);
                 char dpath[strlen(p->pdn) + strlen(dname) + 2];
-                memset(dpath, 0, sizeof(char));
+                memset(dpath, 0, strlen(p->pdn) + strlen(dname) + 2);
                 strcat(dpath, p->pdn);
                 strcat(dpath, "/");
                 strcat(dpath, dname);
