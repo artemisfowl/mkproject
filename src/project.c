@@ -364,14 +364,14 @@ void p_parse_jsdata(const char *jsd, struct project * restrict p)
         /* directories */
         jsmntok_t tok_bdirs = p_get_token_value(jsd, TEMPL_DIR_ID);
         char bdir_str[MAXLEN];
-        memset(bdir_str, 0, sizeof(char));
+        memset(bdir_str, 0, MAXLEN * sizeof(char));
         p_strsplice(jsd, bdir_str, tok_bdirs.start, tok_bdirs.end);
         p_process_bdirs(bdir_str, p);
 
         /* now get the build files to be processed */
         jsmntok_t tok_bfiles = p_get_token_value(jsd, TEMPL_BUILD_ID);
         char bfiles_str[MAXLEN];
-        memset(bfiles_str, 0, sizeof(char));
+        memset(bfiles_str, 0, MAXLEN * sizeof(char));
         p_strsplice(jsd, bfiles_str, tok_bfiles.start, tok_bfiles.end);
         p_process_bfiles(bfiles_str, p);
 }
@@ -422,7 +422,7 @@ int p_process_bfiles(const char *s, struct project * restrict p)
 
                 /* print the key, value pair */
                 char src[MAXLEN];
-                memset(src, 0, sizeof(char));
+                memset(src, 0, MAXLEN * sizeof(char));
                 strcat(src, p->resd);
                 strcat(src, p->pt);
                 strcat(src, "/");
@@ -432,7 +432,7 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                  * - this will be only required for the one which is not going
                  *   to the root directory */
                 char dest[MAXLEN];
-                memset(dest, 0, sizeof(char));
+                memset(dest, 0, MAXLEN * sizeof(char));
 
                 /* first form the source filepath */
                 if (!strcmp(v, ROOT_DIR)) {
@@ -445,7 +445,7 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                         printf("Source file : %s\n", src);
                         /* implement directory check */
                         char dest_dir[MAXLEN];
-                        memset(dest_dir, 0, sizeof(char));
+                        memset(dest_dir, 0, MAXLEN * sizeof(char));
                         strcat(dest_dir, p->pdn);
                         strcat(dest_dir, "/");
                         strcat(dest_dir, v);
@@ -541,10 +541,10 @@ int p_process_bdirs(const char *s, struct project * restrict p)
 
         for (int i = 1; i < nt; i++) {
                 char dname[MAXLEN];
-                memset(dname, 0, sizeof(char));
+                memset(dname, 0, MAXLEN * sizeof(char));
                 p_strsplice(s, dname, t[i].start, t[i].end);
                 char dpath[MAXLEN];
-                memset(dpath, 0, sizeof(char));
+                memset(dpath, 0, MAXLEN * sizeof(char));
                 strcat(dpath, p->pdn);
                 strcat(dpath, "/");
                 strcat(dpath, dname);
@@ -557,8 +557,7 @@ int p_process_bdirs(const char *s, struct project * restrict p)
 void p_read_template(struct project * restrict p)
 {
         char fp[MAXLEN];
-        memset(fp, 0, strlen(p->resd) + strlen(p->pt) +
-                        strlen(RES_EXTENSION) + 1);
+        memset(fp, 0, MAXLEN * sizeof(char));
 
         strcat(fp, p->resd);
         strcat(fp, p->pt);
