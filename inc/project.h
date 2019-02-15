@@ -21,6 +21,10 @@
 #define MIN_ARGS 2
 #endif
 
+#ifndef MAXLEN
+#define MAXLEN 100
+#endif
+
 #ifndef FLAG_LEN
 #define FLAG_LEN 2
 #endif
