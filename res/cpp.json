@@ -1,0 +1,8 @@
+{
+	"dirs": ["inc", "src"],
+	"build_files":
+	{
+		"Makefile": "root",
+		"workspace.sh": "root"
+	}
+}
