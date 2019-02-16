@@ -36,7 +36,6 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
         }
 
-
 	/* count till argc drops */
 	while (argc--) {
 		if (p_parse_flags(*argv, &p)) {
@@ -70,6 +69,5 @@ int main(int argc, char *argv[])
         }
 
 	p_free_res(&p);
-
 	return 0;
 }
