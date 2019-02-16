@@ -1,7 +1,7 @@
 # Makefile for building synax
 # (c) 2017 Sayantan, Nilangshu
 
-CFLAGS = -Wall -Wreturn-type -Werror -std=c11
+CFLAGS = -Wall -Wreturn-type -Wvla -Werror -std=c11
 DBG_FLAGS := -g -g3 -O0 -DENABLE_DEBUG
 REL_FLAGS := -O3
 LDFLAGS :=

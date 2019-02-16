@@ -114,7 +114,7 @@ static char *p_read_file(const char * restrict fp, char *buf)
 {
         FILE *f = fopen(fp, "r");
         if (!f) {
-                perror("Template file doesn't exist\n");
+                perror("Project type template file doesn't exist");
                 return NULL;
         }
 
@@ -328,7 +328,7 @@ jsmntok_t p_get_token_value(const char *jsd, const char *tok_name)
                 printf("No tokens found\n");
                 return r;
         }
-        jsmntok_t t[nt];
+        jsmntok_t t[MAXLEN];
         nt = jsmn_parse(&jp, jsd, strlen(jsd), t, nt);
         if (nt < 1 || t[0].type != JSMN_OBJECT) {
                 printf("Structure of the JSON object is not proper\n");
@@ -363,15 +363,15 @@ void p_parse_jsdata(const char *jsd, struct project * restrict p)
 
         /* directories */
         jsmntok_t tok_bdirs = p_get_token_value(jsd, TEMPL_DIR_ID);
-        char bdir_str[tok_bdirs.end - tok_bdirs.start + 1];
-        memset(bdir_str, 0, tok_bdirs.end - tok_bdirs.start + 1);
+        char bdir_str[MAXLEN];
+        memset(bdir_str, 0, MAXLEN * sizeof(char));
         p_strsplice(jsd, bdir_str, tok_bdirs.start, tok_bdirs.end);
         p_process_bdirs(bdir_str, p);
 
         /* now get the build files to be processed */
         jsmntok_t tok_bfiles = p_get_token_value(jsd, TEMPL_BUILD_ID);
-        char bfiles_str[tok_bfiles.end - tok_bfiles.start + 1];
-        memset(bfiles_str, 0, tok_bfiles.end - tok_bfiles.start + 1);
+        char bfiles_str[MAXLEN];
+        memset(bfiles_str, 0, MAXLEN * sizeof(char));
         p_strsplice(jsd, bfiles_str, tok_bfiles.start, tok_bfiles.end);
         p_process_bfiles(bfiles_str, p);
 }
@@ -396,7 +396,7 @@ int p_process_bfiles(const char *s, struct project * restrict p)
         }
         jsmn_parser jp;
         jsmn_init(&jp);
-        jsmntok_t t[nt];
+        jsmntok_t t[MAXLEN];
         nt = jsmn_parse(&jp, s, strlen(s), t, nt);
         if (nt < 1 || t[0].type != JSMN_OBJECT) {
                 printf("Structure of the JSON object is not proper\n");
@@ -412,16 +412,17 @@ int p_process_bfiles(const char *s, struct project * restrict p)
 
         for (int i = 1; i < nt; i += 2) {
                 /* key == k, value == v */
-                char k[t[i].end - t[i].start + 1];
-                char v[t[i + 1].end - t[i + 1].start + 1];
+                //char k[t[i].end - t[i].start + 1];
+                char k[MAXLEN];
+                char v[MAXLEN];
 
                 /* splice the string */
                 p_strsplice(s, k, t[i].start, t[i].end);
                 p_strsplice(s, v, t[i + 1].start, t[i + 1].end);
 
                 /* print the key, value pair */
-                char src[strlen(p->resd) + strlen(p->pt) + strlen(k) + 2];
-                memset(src, 0, strlen(p->resd) + strlen(p->pt) + strlen(k) + 2);
+                char src[MAXLEN];
+                memset(src, 0, MAXLEN * sizeof(char));
                 strcat(src, p->resd);
                 strcat(src, p->pt);
                 strcat(src, "/");
@@ -429,12 +430,12 @@ int p_process_bfiles(const char *s, struct project * restrict p)
 
                 /* implement check for the directory which will be destination
                  * - this will be only required for the one which is not going
-                 *   to the root directory*/
+                 *   to the root directory */
+                char dest[MAXLEN];
+                memset(dest, 0, MAXLEN * sizeof(char));
 
                 /* first form the source filepath */
                 if (!strcmp(v, ROOT_DIR)) {
-                        char dest[strlen(p->pdn) + strlen(k) + 2];
-                        memset(dest, 0, strlen(p->pdn) + strlen(k) + 2);
                         strcat(dest, p->pdn);
                         strcat(dest, "/");
                         strcat(dest, k);
@@ -443,8 +444,8 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                 } else {
                         printf("Source file : %s\n", src);
                         /* implement directory check */
-                        char dest_dir[strlen(p->pdn) + strlen(v) + 3];
-                        memset(dest_dir, 0, strlen(p->pdn) + strlen(v) + 3);
+                        char dest_dir[MAXLEN];
+                        memset(dest_dir, 0, MAXLEN * sizeof(char));
                         strcat(dest_dir, p->pdn);
                         strcat(dest_dir, "/");
                         strcat(dest_dir, v);
@@ -458,9 +459,6 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                                 return 0;
                         }
 
-                        char dest[strlen(p->pdn) + strlen(v) + strlen(k) + 3];
-                        memset(dest, 0, strlen(p->pdn) + strlen(v) +
-                                        strlen(k) + 3);
                         strcat(dest, p->pdn);
                         strcat(dest, "/");
                         strcat(dest, v);
@@ -535,7 +533,7 @@ int p_process_bdirs(const char *s, struct project * restrict p)
 
         jsmn_parser jp;
         jsmn_init(&jp);
-        jsmntok_t t[nt];
+        jsmntok_t t[MAXLEN];
         nt = jsmn_parse(&jp, s, strlen(s), t, nt);
         if (nt < 1 || t[0].type != JSMN_ARRAY) {
                 printf("Structure of the JSON object is not proper\n");
@@ -543,11 +541,11 @@ int p_process_bdirs(const char *s, struct project * restrict p)
         }
 
         for (int i = 1; i < nt; i++) {
-                char dname[t[i].end - t[i].end + 1];
-                memset(dname, 0, t[i].end - t[i].end + 1);
+                char dname[MAXLEN];
+                memset(dname, 0, MAXLEN * sizeof(char));
                 p_strsplice(s, dname, t[i].start, t[i].end);
-                char dpath[strlen(p->pdn) + strlen(dname) + 2];
-                memset(dpath, 0, strlen(p->pdn) + strlen(dname) + 2);
+                char dpath[MAXLEN];
+                memset(dpath, 0, MAXLEN * sizeof(char));
                 strcat(dpath, p->pdn);
                 strcat(dpath, "/");
                 strcat(dpath, dname);
@@ -559,9 +557,8 @@ int p_process_bdirs(const char *s, struct project * restrict p)
 
 void p_read_template(struct project * restrict p)
 {
-        char fp[strlen(p->resd) + strlen(p->pt) + strlen(RES_EXTENSION) + 1];
-        memset(fp, 0, strlen(p->resd) + strlen(p->pt) +
-                        strlen(RES_EXTENSION) + 1);
+        char fp[MAXLEN];
+        memset(fp, 0, MAXLEN * sizeof(char));
 
         strcat(fp, p->resd);
         strcat(fp, p->pt);
@@ -569,8 +566,6 @@ void p_read_template(struct project * restrict p)
 
         char *jsnd = NULL;
         jsnd = p_read_file(fp, jsnd);
-
-        /* what happens when the template file is written in a wrong way? */
 
         if (jsnd)
                 p_parse_jsdata(jsnd, p);
