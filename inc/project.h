@@ -212,4 +212,12 @@ void p_read_template(struct project * restrict p);
  */
 void p_mkproject(struct project * restrict p);
 
+/**
+ * @function check_parent_dir
+ * @brief function to check the parent directory which will be housing the 
+ * mkproject configuration file
+ * @params [in] pdir is a pointer to the path to the .config directory
+ */
+void check_parent_dir(const char *pdir);
+
 #endif

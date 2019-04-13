@@ -583,3 +583,7 @@ void p_mkproject(struct project * restrict p)
         p_read_template(p);
 }
 
+void check_parent_dir(const char *pdir)
+{
+	/* code will be added later */
+}
