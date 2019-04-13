@@ -33,6 +33,10 @@
 #define USER_HOME "HOME"
 #endif
 
+#ifndef PARENT_CONF
+#define PARENT_CONF "/.config/"
+#endif
+
 #ifndef CONFIG_LOC
 #define CONFIG_LOC "/.config/mkproject/"
 #endif
@@ -214,10 +218,9 @@ void p_mkproject(struct project * restrict p);
 
 /**
  * @function check_parent_dir
- * @brief function to check the parent directory which will be housing the 
+ * @brief function to check the parent directory which will be housing the
  * mkproject configuration file
- * @params [in] pdir is a pointer to the path to the .config directory
  */
-void check_parent_dir(const char *pdir);
+void p_check_parent_dir(void);
 
 #endif
