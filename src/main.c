@@ -29,6 +29,13 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
+	/*
+	 * Before going ahead with getting the details from the CLI arguments
+	 * check if the .config directory exists or not.
+	 * Add the function in the project module
+	 */
+	p_check_parent_dir();
+
 	/* decrement the arg count so that we do not handle the name of the
 	 * program and increment the arg value pointer to point to the
 	 * first argument instead of the name of the program in argv[0] */

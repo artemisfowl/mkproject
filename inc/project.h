@@ -33,6 +33,10 @@
 #define USER_HOME "HOME"
 #endif
 
+#ifndef PARENT_CONF
+#define PARENT_CONF "/.config/"
+#endif
+
 #ifndef CONFIG_LOC
 #define CONFIG_LOC "/.config/mkproject/"
 #endif
@@ -211,5 +215,12 @@ void p_read_template(struct project * restrict p);
  * @params [in] p is a pointer to a struct project instance
  */
 void p_mkproject(struct project * restrict p);
+
+/**
+ * @function check_parent_dir
+ * @brief function to check the parent directory which will be housing the
+ * mkproject configuration file
+ */
+void p_check_parent_dir(void);
 
 #endif

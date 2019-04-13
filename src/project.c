@@ -232,7 +232,6 @@ int p_check_config_dir(const char *cl)
 {
         int r = 0;
 
-        /* check if the mkproject directory exists or not */
         if (!p_dir_exists(cl)) {
                 if (p_create_dir(cl) != 0) {
                         r = 0;
@@ -583,3 +582,18 @@ void p_mkproject(struct project * restrict p)
         p_read_template(p);
 }
 
+void p_check_parent_dir(void)
+{
+        char *h = getenv(USER_HOME);
+        char *cl = calloc(strlen(h) + strlen(PARENT_CONF) + 1, sizeof(char));
+        cl = strcat(cl, h);
+        cl = strcat(cl, PARENT_CONF);
+
+        if (p_check_config_dir(cl) == 1) {
+		printf("parent configuration directory not found");
+		printf("Creating parent directory at : %s\n", cl);
+		p_create_dir(cl);
+        }
+
+	free(cl);
+}
