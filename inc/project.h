@@ -1,7 +1,7 @@
 /**
  * @file 	project.h
  * @author 	sb
- * @brief 	project file holding all the atomic functions
+ * @brief 	Project Header containing all the details for mkproject
  */
 
 #ifndef PROJECT_H
@@ -70,12 +70,14 @@
 #endif
 
 /* enum */
+#if 0
 enum project_t {	/* this might be deprecated later */
 	C,
 	CPP,
 	UNRECOGNIZED,
 	nentries = 3
 };
+#endif
 
 /* structure */
 struct project {

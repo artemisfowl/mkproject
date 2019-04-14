@@ -589,8 +589,11 @@ void p_check_parent_dir(void)
         cl = strcat(cl, h);
         cl = strcat(cl, PARENT_CONF);
 
+	/* there seems to be a bug here - it is continuously saying that the
+	 * parent configuration directory is not found - this should not be the
+	 * case since the directory is already present */
         if (p_check_config_dir(cl) == 1) {
-		printf("parent configuration directory not found");
+		printf("parent configuration directory not found\n");
 		printf("Creating parent directory at : %s\n", cl);
 		p_create_dir(cl);
         }
