@@ -389,7 +389,7 @@ int p_process_bfiles(const char *s, struct project * restrict p)
                                 " has not been provided\n");
                 return 0;
         }
-        printf("Build files JSON : %s\n", s);
+        printf("Project type specific files to be copied : %s\n", s);
 
         int nt = p_get_tokenc(s);
         if (!nt) {
