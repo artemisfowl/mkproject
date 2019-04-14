@@ -230,6 +230,9 @@ void p_free_res(struct project * restrict p)
 
 int p_check_config_dir(const char *cl)
 {
+        /*
+         * return value - 0 (success) and 1 (failure)
+         */
         int r = 0;
 
         if (!p_dir_exists(cl)) {
@@ -251,9 +254,9 @@ int p_get_resd_loc(struct project * restrict p)
         cl = strcat(cl, CONFIG_LOC);
 
         if (p_check_config_dir(cl) == 1) {
-                printf("Could not create the config directory\n");
-                printf("Config directory may already be present at "
-                                "~/.config/mkproject\n");
+                /*printf("Could not create the config directory\n");*/
+                printf("Config directory is already be present at "
+                                "%s\n", cl);
         }
 
         cl = realloc(cl, (strlen(h) + strlen(CONFIG_LOC)
@@ -358,7 +361,7 @@ void p_parse_jsdata(const char *jsd, struct project * restrict p)
                 return;
         }
 
-        printf("\nJSON data received : %s\n", jsd);
+        /*printf("\nJSON data received : %s\n", jsd);*/
 
         /* directories */
         jsmntok_t tok_bdirs = p_get_token_value(jsd, TEMPL_DIR_ID);
@@ -441,7 +444,7 @@ int p_process_bfiles(const char *s, struct project * restrict p)
 
                         p_copy_file(src, dest);
                 } else {
-                        printf("Source file : %s\n", src);
+                        /*printf("Source file : %s\n", src);*/
                         /* implement directory check */
                         char dest_dir[MAXLEN];
                         memset(dest_dir, 0, MAXLEN * sizeof(char));
@@ -520,7 +523,7 @@ int p_process_bdirs(const char *s, struct project * restrict p)
         }
 
         /* JSON data to be parsed */
-        printf("Directory string : %s\n", s);
+        printf("List of directories to be created: %s\n", s);
 
         /* starting to reparse the input string */
         int nt = p_get_tokenc(s);
@@ -528,7 +531,7 @@ int p_process_bdirs(const char *s, struct project * restrict p)
                 printf("No tokens found\n");
                 return 0;
         }
-        printf("Number of tokens found : %d\n", nt);
+        /*printf("Number of tokens found : %d\n", nt);*/
 
         jsmn_parser jp;
         jsmn_init(&jp);
@@ -589,14 +592,9 @@ void p_check_parent_dir(void)
         cl = strcat(cl, h);
         cl = strcat(cl, PARENT_CONF);
 
-	/* there seems to be a bug here - it is continuously saying that the
-	 * parent configuration directory is not found - this should not be the
-	 * case since the directory is already present */
-        if (p_check_config_dir(cl) == 1) {
-		printf("parent configuration directory not found\n");
-		printf("Creating parent directory at : %s\n", cl);
-		p_create_dir(cl);
-        }
+        /* not sure why it is saying that the config directory doesn't exist */
+        if (p_check_config_dir(cl) == 1)
+		printf("%s already present\n", cl);
 
 	free(cl);
 }
