@@ -29,13 +29,6 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	/*
-	 * Before going ahead with getting the details from the CLI arguments
-	 * check if the .config directory exists or not.
-	 * Add the function in the project module
-	 */
-	p_check_parent_dir();
-
 	/* decrement the arg count so that we do not handle the name of the
 	 * program and increment the arg value pointer to point to the
 	 * first argument instead of the name of the program in argv[0] */
@@ -44,20 +37,19 @@ int main(int argc, char *argv[])
 
 	struct project p;
 	if (p_setup(&p)) {
-                perror("p_setup failed\n");
+                perror("p_setup failed");
 		exit(EXIT_FAILURE);
         }
 
 	/* count till argc drops */
 	while (argc--) {
-		if (p_parse_flags(*argv, &p)) {
-                        perror("p_parse_flags failed\n");
+		if (p_parse_flags(*argv, &p))
                         exit(EXIT_FAILURE);
-                }
+
 		argv++;
 		if (p.rdp_t) {
 			if (p_assign_ptype(*argv, &p)) {
-                                perror("p_assign_ptype failed\n");
+                                perror("p_assign_ptype failed");
                                 exit(EXIT_FAILURE);
                         }
 			p.rdp_t = false;
@@ -67,6 +59,13 @@ int main(int argc, char *argv[])
 			break;
 		}
 	}
+
+	/*
+	 * Before going ahead with getting the details from the CLI arguments
+	 * check if the .config directory exists or not.
+	 * Add the function in the project module
+	 */
+	p_check_parent_dir();
 
         /* need a return type from this function */
 	if (p_get_resd_loc(&p)) {
