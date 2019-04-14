@@ -16,12 +16,39 @@ of the configurations have been done properly.
 $ mkproject -t <json_template_name> <path_where_project_has_to_be_created>
 .PP
 $ mkproject -t c ~/data/code/commit/github/c_project
+.PP
+This program can be setup in the following way:
+.PP
+Initially this program keeps a configuration file in the user $HOME/.config
+directory. This configuration file(called mkpconfig) can be found under
+mkproject directory inside $HOME/.config. The file contains only one single
+entry, an absolute path to the location where the template directories will be
+kept.
+.PP
+When the program is run for the first time, it will check if these directories
+are present or not and if not, create them. It will also check if the mkpconfig
+file is present or not and if not it will create an empty file with a dummy
+path to the /res/ directory.
+.PP
+The /res/ directory is the one which will be housing the project JSON templates
+as well as the build files which need to be copied.
 .SH OPTIONS
 Usage of the program:
+.PP
 <program> -t <type> <name_of_project>
+.PP
 -t              type of the project
+.PP
 -v              display version information
+.PP
 -h              display help information
+.PP
 -c              display config file help information
+.PP
 For example, in order to create a C project
+.PP
 mkproject -t c c_project_name
+.SH BUGS
+No known bugs
+.SH AUTHOR
+sb(artemisfowl on GitHub)
