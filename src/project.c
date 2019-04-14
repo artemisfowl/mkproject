@@ -113,9 +113,9 @@ static int p_create_dir(const char *dp)
 static char *p_read_file(const char * restrict fp, char *buf)
 {
         FILE *f = fopen(fp, "r");
-        char errl[MAXLEN];
-        memset(errl, 0, MAXLEN * sizeof(char));
         if (!f) {
+                char errl[MAXLEN];
+                memset(errl, 0, MAXLEN * sizeof(char));
                 sprintf(errl, "%s template file doesn't exist", fp);
                 perror(errl);
                 return NULL;
