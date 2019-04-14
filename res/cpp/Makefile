@@ -1,6 +1,7 @@
 # Makefile for building synax
 # (c) 2017 Sayantan, Nilangshu
 
+CC := g++
 CFLAGS = -Wall -Wreturn-type -Werror -std=c++11
 DBG_FLAGS := -g -g3 -O0 -DENABLE_DEBUG
 REL_FLAGS := -O2
