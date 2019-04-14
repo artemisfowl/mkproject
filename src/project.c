@@ -255,7 +255,7 @@ int p_get_resd_loc(struct project * restrict p)
 
         if (p_check_config_dir(cl) == 1) {
                 /*printf("Could not create the config directory\n");*/
-                printf("Config directory is already be present at "
+                printf("Config directory is already present at "
                                 "%s\n", cl);
         }
 
