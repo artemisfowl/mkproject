@@ -1,0 +1,27 @@
+.\" Manpage for mkproject.
+.\" Contact skb655952@gmail.com to correct errors or typos
+.TH man 1 "14 Apr 2019" "1.0" "mkproject man page"
+.SH NAME
+mkproject \- create a project structure based on the template specified
+.SH SYNOPSIS
+mkproject [-t[JSON template filename]] [project_directory_name/location]
+.SH DESCRIPTION
+mkproject is a shell program made to reduce the time taken to create the base
+project structure using a template specified by the user.
+For example, if the user wishes to create a C-lang type project and wants to
+create certain specified directories to be held inside the project along with
+certain build related files, the following command should do so provided rest
+of the configurations have been done properly.
+
+$ mkproject -t <json_template_name> <path_where_project_has_to_be_created>
+.PP
+$ mkproject -t c ~/data/code/commit/github/c_project
+.SH OPTIONS
+Usage of the program:
+<program> -t <type> <name_of_project>
+-t              type of the project
+-v              display version information
+-h              display help information
+-c              display config file help information
+For example, in order to create a C project
+mkproject -t c c_project_name
