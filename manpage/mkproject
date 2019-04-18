@@ -16,7 +16,7 @@ of the configurations have been done properly.
 $ mkproject -t <json_template_name> <path_where_project_has_to_be_created>
 .PP
 $ mkproject -t c ~/data/code/commit/github/c_project
-.PP
+.SH SETUP
 This program can be setup in the following way:
 .PP
 Initially this program keeps a configuration file in the user $HOME/.config
@@ -32,6 +32,10 @@ path to the /res/ directory.
 .PP
 The /res/ directory is the one which will be housing the project JSON templates
 as well as the build files which need to be copied.
+.PP
+For example, if the type of the project is C, which means C-lang would be used
+for building the final executable, then the /res/ directory(RSC) will contain
+a file called
 .SH OPTIONS
 Usage of the program:
 .PP
