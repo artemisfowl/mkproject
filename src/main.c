@@ -67,6 +67,10 @@ int main(int argc, char *argv[])
 	 */
 	p_check_parent_dir();
 
+	/* fixme: Add the code for copying the resource directory to the
+	 * mkproject directory under ~/.config */
+	p_copy_resources();
+
         /* need a return type from this function */
 	if (p_get_resd_loc(&p)) {
                 /* failure case - dummy file has been created without any

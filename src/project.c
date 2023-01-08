@@ -281,9 +281,23 @@ int p_get_resd_loc(struct project * restrict p)
                 }
         } else {
                 /* file doesn't exist - create an empty file */
-                p_write_file(cl, NULL);
+		printf("Updating file with the resource directory location\n");
+		char *h = getenv(USER_HOME);
+		char *hcl = calloc(strlen(h) + strlen(CONFIG_RES_LOC) + 1,
+				sizeof(char));
+		hcl = strcat(hcl, h);
+		hcl = strcat(hcl, CONFIG_RES_LOC);
+		char resl[100];
+		memset(resl, '\0', 100);
+		sprintf(resl, "res_dir_location=%s", hcl);
+                p_write_file(cl, resl);
+
+		free(hcl);
+
+		p->resd = p_read_config(cl);
+		printf("Value of resource directory : %s\n", p->resd);
                 free(cl);
-                return 1;
+                return 0;
         }
 
         free(cl);
@@ -590,6 +604,7 @@ void p_mkproject(struct project * restrict p)
 
 void p_check_parent_dir(void)
 {
+	/* fixme: something might be missing on this one */
         char *h = getenv(USER_HOME);
         char *cl = calloc(strlen(h) + strlen(PARENT_CONF) + 1, sizeof(char));
         cl = strcat(cl, h);
@@ -598,6 +613,41 @@ void p_check_parent_dir(void)
         /* not sure why it is saying that the config directory doesn't exist */
         if (p_check_config_dir(cl) == 1)
 		printf("%s already present\n", cl);
+
+	free(cl);
+}
+
+void p_copy_resources(void)
+{
+        char *h = getenv(USER_HOME);
+        char *cl = calloc(strlen(h) + strlen(CONFIG_RES_LOC) + 1, sizeof(char));
+        cl = strcat(cl, h);
+        cl = strcat(cl, CONFIG_RES_LOC);
+
+	DIR *dir = opendir(cl);
+	if (dir) {
+		printf("Resource directory exists\n");
+		closedir(dir);
+	} else if (errno == ENOENT) {
+		printf("Resource directory does not exist -- creating\n");
+
+		/* fixme: why is the directory not getting created in the first
+		 * run with p_create_dir function call? */
+		char cmd[100];
+		memset(cmd, '\0', 100);
+		sprintf(cmd, "mkdir -p %s", cl);
+		system(cmd);
+
+		/* fixme: Add the code for copying the files from the repo
+		 * location for now, let's try a hacky way of getting the
+		 * work done - add the code for ftw to walk through the
+		 * directory */
+		printf("Copying resource directory contents\n");
+		memset(cmd, '\0', 100);
+		sprintf(cmd, "cp -rf ../res/ %s%s", h, CONFIG_LOC);
+		system(cmd);
+	} else
+		printf("Failed to check if dir exists\n");
 
 	free(cl);
 }

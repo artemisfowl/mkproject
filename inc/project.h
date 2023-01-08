@@ -41,6 +41,10 @@
 #define CONFIG_LOC "/.config/mkproject/"
 #endif
 
+#ifndef CONFIG_RES_LOC
+#define CONFIG_RES_LOC "/.config/mkproject/res/"
+#endif
+
 #ifndef CONFIG_FILE
 #define CONFIG_FILE "mkpconfig"
 #endif
@@ -224,5 +228,11 @@ void p_mkproject(struct project * restrict p);
  * mkproject configuration file
  */
 void p_check_parent_dir(void);
+
+/**
+ * @function p_copy_resources
+ * @brief function to copy the resource directory to the config location
+ */
+void p_copy_resources(void);
 
 #endif
