@@ -620,9 +620,9 @@ void p_check_parent_dir(void)
 void p_copy_resources(void)
 {
         char *h = getenv(USER_HOME);
-        char *cl = calloc(strlen(h) + strlen(CONFIG_RES_LOC) + 1, sizeof(char));
+        char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
         cl = strcat(cl, h);
-        cl = strcat(cl, CONFIG_RES_LOC);
+        cl = strcat(cl, CONFIG_LOC);
 
 	DIR *dir = opendir(cl);
 	if (dir) {
@@ -630,14 +630,17 @@ void p_copy_resources(void)
 		closedir(dir);
 	} else if (errno == ENOENT) {
 		printf("Resource directory does not exist -- creating\n");
+		printf("Parent Directory creation status : %s\n",
+				p_create_dir(cl) == 0 ? "Success": "Failed");
+		p_create_dir(cl);
+		cl = calloc(strlen(cl) + strlen(CONFIG_RES_LOC) + 1,
+				sizeof(char));
+		cl = strcat(cl, h);
+		cl = strcat(cl, CONFIG_RES_LOC);
+		printf("Resource directory creation status : %s\n",
+				p_create_dir(cl) == 0 ? "Success": "Failed");
 
-		/* fixme: why is the directory not getting created in the first
-		 * run with p_create_dir function call? */
 		char cmd[100];
-		memset(cmd, '\0', 100);
-		sprintf(cmd, "mkdir -p %s", cl);
-		system(cmd);
-
 		/* fixme: Add the code for copying the files from the repo
 		 * location for now, let's try a hacky way of getting the
 		 * work done - add the code for ftw to walk through the
