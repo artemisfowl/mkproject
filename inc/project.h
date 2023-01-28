@@ -33,6 +33,10 @@
 #define USER_HOME "HOME"
 #endif
 
+#ifndef RESD_LOC_MASTER
+#define RESD_LOC_MASTER "../res"
+#endif
+
 #ifndef PARENT_CONF
 #define PARENT_CONF "/.config/"
 #endif

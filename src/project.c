@@ -14,7 +14,11 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/sendfile.h>
 #include <unistd.h>
+#include <ftw.h>
+#include <fcntl.h>
+#include <linux/limits.h>
 #include "../inc/project.h"
 #include "../inc/version.h"
 
@@ -133,6 +137,61 @@ static char *p_read_file(const char * restrict fp, char *buf)
         free(t);
         fclose(f);
         return buf;
+}
+
+static int p_copy_contents(const char* fpath,const struct stat*sb,int tflag)
+{
+	/* fixme: check if the file referred is a directory or not */
+	if (S_ISDIR(sb->st_mode)) {
+		if (strcmp(fpath, RESD_LOC_MASTER)) {
+			char *token = strtok((char *)fpath, "..");
+
+			char *h = getenv(USER_HOME);
+			char cl[PATH_MAX];
+			memset(cl, '\0', PATH_MAX);
+			strcat(cl, h);
+			strcat(cl, CONFIG_LOC);
+			strcat(cl, token);
+
+			p_create_dir(cl);
+		}
+	} else {
+		char token[PATH_MAX];
+		memset(token, '\0', PATH_MAX);
+		p_strsplice(fpath, token, 3, strlen(fpath));
+		//char *token = strtok((char *)fpath, "..");
+
+		char *h = getenv(USER_HOME);
+		char cl[PATH_MAX];
+		memset(cl, '\0', PATH_MAX);
+		strcat(cl, h);
+		strcat(cl, CONFIG_LOC);
+		strcat(cl, token);
+
+
+		int source, destination;
+		if ((source = open(fpath, O_RDONLY)) == -1) {
+			printf("Unable to open file\n");
+			return -1;
+		}
+		if ((destination = creat(cl, 0660)) == -1) {
+			printf("Unable to create file at destination\n");
+			close(destination);
+			return -1;
+		}
+
+		struct stat fileinfo = {0};
+		fstat(source, &fileinfo);
+		if (sendfile(destination, source, NULL, fileinfo.st_size)
+				== -1) {
+			fprintf(stderr, "ERROR : Unable to sendfile\n");
+			return -1;
+		}
+
+		close(source);
+		close(destination);
+	}
+	return 0;
 }
 
 /* header functions */
@@ -620,10 +679,12 @@ void p_check_parent_dir(void)
 void p_copy_resources(void)
 {
         char *h = getenv(USER_HOME);
-        char *cl = calloc(strlen(h) + strlen(CONFIG_LOC) + 1, sizeof(char));
-        cl = strcat(cl, h);
-        cl = strcat(cl, CONFIG_LOC);
+	char cl[PATH_MAX];
+	memset(cl, '\0', PATH_MAX);
+        strcat(cl, h);
+        strcat(cl, CONFIG_LOC);
 
+	printf("cl value (before checking directory existence : %s\n", cl);
 	DIR *dir = opendir(cl);
 	if (dir) {
 		printf("Resource directory exists\n");
@@ -632,25 +693,16 @@ void p_copy_resources(void)
 		printf("Resource directory does not exist -- creating\n");
 		printf("Parent Directory creation status : %s\n",
 				p_create_dir(cl) == 0 ? "Success": "Failed");
-		p_create_dir(cl);
-		cl = calloc(strlen(cl) + strlen(CONFIG_RES_LOC) + 1,
-				sizeof(char));
-		cl = strcat(cl, h);
-		cl = strcat(cl, CONFIG_RES_LOC);
+		memset(cl, '\0', PATH_MAX);
+		strcat(cl, h);
+		strcat(cl, CONFIG_RES_LOC);
 		printf("Resource directory creation status : %s\n",
 				p_create_dir(cl) == 0 ? "Success": "Failed");
 
-		char cmd[100];
-		/* fixme: Add the code for copying the files from the repo
-		 * location for now, let's try a hacky way of getting the
-		 * work done - add the code for ftw to walk through the
-		 * directory */
-		printf("Copying resource directory contents\n");
-		memset(cmd, '\0', 100);
-		sprintf(cmd, "cp -rf ../res/ %s%s", h, CONFIG_LOC);
-		system(cmd);
+		/* cl now points to the target location - .config/mkproject */
+		printf("cl value (before copying contents): %s\n", cl);
+
+		ftw(RESD_LOC_MASTER, p_copy_contents, 20);
 	} else
 		printf("Failed to check if dir exists\n");
-
-	free(cl);
 }
