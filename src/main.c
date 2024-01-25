@@ -11,11 +11,6 @@
 #include <stdio.h>
 #include "../inc/project.h"
 
-/*
- * TODO: Check if the doxygen comments are correct or not
- * TODO: Check the issue with the program not running in my DO server issue
- */
-
 int main(int argc, char *argv[])
 {
 	if (argc < MIN_ARGS || argc > MAX_ARGS) {
