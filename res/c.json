@@ -4,6 +4,7 @@
 	{
 		"Makefile": "root",
 		"workspace.sh": "root",
+		"builder.py": "root",
 		"doxyfile": "docs"
 	}
 }
