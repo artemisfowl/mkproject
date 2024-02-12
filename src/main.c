@@ -30,6 +30,8 @@ int main(int argc, char *argv[])
 	argc--;
 	argv++;
 
+  /* fixme: make this program to compile in Darwin as well */
+
 	struct project p;
 	if (p_setup(&p)) {
                 perror("p_setup failed");
