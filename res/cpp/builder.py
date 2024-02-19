@@ -19,18 +19,18 @@ def update_build_info(major: int = 0, minor: int = 0, build_number: int = 1) -> 
 		binfo_file.write("#define BUILDINFO_H\n\n")
 
 		# add the details of the build information
-		print(f"{EDIT_ICON}: Updating major value : {major}")
+		print(f"{EDIT_ICON} : Updating major value : {major}")
 		binfo_file.write("#ifndef MAJOR\n")
-		binfo_file.write(f"#define {major}\n")
-		binfo_file.write("#endif")
-		print(f"{EDIT_ICON}: Updating minor value : {minor}")
+		binfo_file.write(f"\t#define MAJOR {major}\n")
+		binfo_file.write("#endif\n\n")
+		print(f"{EDIT_ICON} : Updating minor value : {minor}")
 		binfo_file.write("#ifndef MINOR\n")
-		binfo_file.write(f"#define {minor}\n")
-		binfo_file.write("#endif")
-		print(f"{EDIT_ICON}: Updating build number value : {build_number}")
+		binfo_file.write(f"\t#define MINOR {minor}\n")
+		binfo_file.write("#endif\n\n")
+		print(f"{EDIT_ICON} : Updating build number value : {build_number}")
 		binfo_file.write("#ifndef BUILD_NUMBER\n")
-		binfo_file.write(f"#define {build_number}\n")
-		binfo_file.write("#endif")
+		binfo_file.write(f"\t#define BUILD_NUMBER {build_number}\n")
+		binfo_file.write("#endif\n\n")
 
 		# write the header guard completion
 		binfo_file.write("#endif")
@@ -49,33 +49,33 @@ def read_version_info() -> dict:
 	return data
 
 def make_project() -> None:
-	system("make clean && make")
+	system("make")
 
 
 def main() -> None:
 	major, minor, build_number = 0, 0, 1
-	print(f"{GEAR_ICON}: Building project - {str(Path(__file__).resolve()).split(sep)[-2]}\n")
+	print(f"{GEAR_ICON} : Building project - {str(Path(__file__).resolve()).split(sep)[-2]}\n")
 
 	if not Path(f"{getcwd()}{sep}Makefile").exists():
-		print(f"{ERROR_ICON}: Makefile is not present in this directory")
+		print(f"{ERROR_ICON} : Makefile is not present in this directory")
 		print("Please place this file in the same directory where 'Makefile' is present")
 		print("Exiting...\n")
 		exit(-1)
 	else:
-		print(f"{PASS_ICON}: Makefile found\n")
+		print(f"{PASS_ICON} : Makefile found\n")
 
 		# check if the header file is present or not for capturing version information
 		if not Path(f"{getcwd()}{sep}inc{sep}buildinfo.h").exists():
-			print(f"{FILE_ICON}: buildinfo header file is not present - creating it")
+			print(f"{FILE_ICON} : buildinfo header file is not present - creating it")
 			update_build_info()
 			store_version_info(major=major, minor=minor, build_number=build_number)
 
-			print(f"\n{BUILD_ICON}: Building project ...\n")
+			print(f"\n{BUILD_ICON} : Building project ...\n")
 			make_project()
 		else:
 			# if the file is present, read the file and update the values before incrementing the build number
-			print(f"{FILE_ICON}: buildinfo header file is present - updating it")
-			print(f"{GEAR_ICON}: Updating build versions")
+			print(f"{FILE_ICON} : buildinfo header file is present - updating it")
+			print(f"{GEAR_ICON} : Updating build versions")
 
 			data = read_version_info()
 			major = data["major"]
@@ -95,7 +95,7 @@ def main() -> None:
 			update_build_info(major=major, minor=minor, build_number=build_number)
 			store_version_info(major=major, minor=minor, build_number=build_number)
 
-			print(f"\n{BUILD_ICON}: Building project ...\n")
+			print(f"\n{BUILD_ICON} : Building project ...\n")
 			make_project()
 		print()
 
